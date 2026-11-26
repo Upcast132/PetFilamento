@@ -17,7 +17,9 @@ Un Arduino Uno hace dos cosas:
 > (ATmega328P), pero todavía no se ha probado con la máquina real. Sigue
 > [docs/puesta-en-marcha.md](docs/puesta-en-marcha.md) antes de usarla.
 
-Licencia: por definir.
+Licencia: MIT (ver [LICENSE](LICENSE)). Cubre el firmware y la documentación
+de este repositorio. Las piezas del PetPull-2 y del PETamentor2 tienen sus
+propias licencias (ver Créditos).
 
 ---
 
@@ -26,6 +28,7 @@ Licencia: por definir.
 ```
 PetFilamento/
 ├── README.md
+├── LICENSE
 ├── firmware/PetFilamento/PetFilamento.ino
 └── docs/
     ├── cableado.md          # conexiones detalladas
