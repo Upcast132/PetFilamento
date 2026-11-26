@@ -4,7 +4,7 @@
  * Firmware para la máquina que convierte tiras de botellas PET en filamento
  * de 1.75 mm (mecánica PetPull-2 de Sapienz, Thingiverse 4900782).
  *
- * El Arduino Nano hace SOLO dos cosas:
+ * El Arduino Uno hace SOLO dos cosas:
  *   1. Controla la velocidad del motor NEMA 17 (A4988) según un potenciómetro.
  *   2. Actúa como TOPE de seguridad de temperatura: si la boquilla se pasa de
  *      TEMP_TOPE_C, activa el relé y corta la pistola de silicón.
@@ -16,7 +16,7 @@
  *
  * Estado: SIN PROBAR EN HARDWARE.
  *
- * Placa: Arduino Nano (ATmega328P). Librería: AccelStepper.
+ * Placa: Arduino Uno (ATmega328P). Librería: AccelStepper.
  * Sin delay() en todo el código.
  * ---------------------------------------------------------------------------
  */
@@ -32,9 +32,9 @@
 // (Los mensajes de FALLA se envían siempre, con o sin esta opción.)
 #define DEBUG_SERIAL
 
-// Watchdog de 2 s. Desactivado por defecto: los Nano con el bootloader viejo
-// (ATmega328P "Old Bootloader") pueden quedar en un bucle de reinicios tras un
-// reset por watchdog. Actívalo solo si sabes que tu bootloader lo soporta.
+// Watchdog de 2 s. Desactivado por defecto. El Uno con Optiboot lo soporta,
+// pero hay que probarlo en banco (sin 110 V) antes de activarlo: algunos
+// clones traen otro bootloader y pueden quedar en un bucle de reinicios.
 // #define USAR_WATCHDOG
 
 #ifdef USAR_WATCHDOG
@@ -311,7 +311,7 @@ void entrarEnFalla(const char *motivo) {
 
 void evaluarTemperatura() {
   if (enFalla) {
-    activarRele();  // la falla es enclavada: solo sale reiniciando el Nano
+    activarRele();  // la falla es enclavada: solo sale reiniciando el Uno
     return;
   }
 
@@ -378,7 +378,7 @@ void imprimirFalla() {
   Serial.print(motivoFalla);
   Serial.print(F(" (ADC termistor="));
   Serial.print((int)adcNtcFiltrado);
-  Serial.println(F("). Pistola cortada, motor detenido. Reinicia el Nano."));
+  Serial.println(F("). Pistola cortada, motor detenido. Reinicia el Uno."));
 }
 
 // ===========================================================================

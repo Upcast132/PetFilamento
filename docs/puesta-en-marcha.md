@@ -2,7 +2,11 @@
 
 Sigue los pasos en orden. **Del paso 1 al 4 se trabaja SIN 110 V**: la pistola
 queda desenchufada todo ese tiempo. Para los pasos 1 y 2 basta con alimentar
-el Nano por USB. El adaptador de 12 V hace falta desde el paso 3.
+el Uno por USB. El adaptador de 12 V hace falta desde el paso 3.
+
+> **USB con el adaptador enchufado:** el Uno original conmuta solo entre USB
+> y fuente externa, así que puedes ver el Serial con los 12 V conectados. En
+> un clon, apaga la máquina antes de conectar el USB.
 
 Anota cada valor medido y cópialo en las constantes del inicio de
 `firmware/PetFilamento/PetFilamento.ino`.
@@ -16,7 +20,7 @@ termopar), destornillador pequeño de cerámica o plástico y pinzas.
 
 Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
 
-1. Alimenta el módulo: VCC a 5 V y GND a GND (del Nano conectado por USB).
+1. Alimenta el módulo: VCC a 5 V y GND a GND (del Uno conectado por USB).
 2. Pon el multímetro en **continuidad** entre los bornes **COM** y **NC**.
    Con el relé en reposo debe pitar (NC cerrado).
 3. Con un cable, conecta **IN a GND**.
@@ -26,7 +30,7 @@ Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
    - Si ahora hace "clic" y COM–NC deja de pitar: es **activo en alto** →
      `RELE_NIVEL_ACTIVO = HIGH`.
 5. Comprueba también qué pasa con **IN al aire** (desconectado). Así está el
-   pin mientras el Nano arranca. Lo normal en un módulo activo en bajo es que
+   pin mientras el Uno arranca. Lo normal en un módulo activo en bajo es que
    el relé quede en reposo, y con eso la pistola funciona normal.
 6. Graba el firmware y verifica por Serial: al arrancar debe decir
    `rele=normal` y COM–NC debe seguir pitando. Si dice `normal` pero COM–NC
@@ -46,7 +50,7 @@ Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
      desconectado o mal soldado.
    - Si aparece `FALLA: termistor en cortocircuito`, revisa que las patas no se
      toquen entre sí ni toquen la boquilla.
-   - Para salir de una falla hay que reiniciar el Nano.
+   - Para salir de una falla hay que reiniciar el Uno.
 4. Compara con el termómetro de referencia en al menos dos puntos:
    - Temperatura ambiente.
    - Agua caliente o hirviendo, con el termistor y el termómetro juntos (mete
@@ -134,7 +138,7 @@ Prueba del tope (con supervisión):
    `rele=normal`.
 4. Desconecta el termistor con la pistola funcionando. El relé debe cortar al
    instante, y en menos de 1 s debe salir el mensaje de FALLA cada 2 s. Para
-   salir, reinicia el Nano.
+   salir, reinicia el Uno.
 5. **Vuelve a poner `TEMP_TOPE_C` en su valor definitivo** y graba de nuevo.
 6. Deja la pistola calentar sola unos 10 minutos y anota la temperatura máxima
    que alcanza. `TEMP_TOPE_C` debe quedar algo por encima de ese valor: si

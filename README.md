@@ -6,14 +6,14 @@ pistola de silicón. Un carrete, movido por un motor NEMA 17 con un reductor de
 engranajes impreso, enrolla el filamento. La mecánica es la del **PetPull-2**
 de Sapienz.
 
-Un Arduino Nano hace dos cosas:
+Un Arduino Uno hace dos cosas:
 
 1. **Controla la velocidad del motor** según un potenciómetro.
 2. **Es un tope de seguridad de temperatura**: si la boquilla se pasa de la
-   temperatura límite, un relé corta la pistola. El Nano **no** controla el
+   temperatura límite, un relé corta la pistola. El Uno **no** controla el
    calentamiento normal. La pistola se calienta sola con su PTC.
 
-> **Estado:** firmware **sin probar en hardware**. Compila para Arduino Nano
+> **Estado:** firmware **sin probar en hardware**. Compila para Arduino Uno
 > (ATmega328P), pero todavía no se ha probado con la máquina real. Sigue
 > [docs/puesta-en-marcha.md](docs/puesta-en-marcha.md) antes de usarla.
 
@@ -36,8 +36,8 @@ PetFilamento/
 
 | Cant. | Componente | Notas |
 |---|---|---|
-| 1 | Arduino Nano (ATmega328P) | Alimentado por VIN con 12 V |
-| 1 | Adaptador de 12 V | Alimenta el Nano (VIN) y el motor (VMOT) |
+| 1 | Arduino Uno (ATmega328P) | 12 V por el jack (centro positivo; el Uno acepta de 7 a 12 V) o por VIN |
+| 1 | Adaptador de 12 V | Alimenta el Uno (jack o VIN) y el motor (VMOT) |
 | 1 | Driver A4988 | En 1/8 de paso (MS1 y MS2 en alto, MS3 en bajo) |
 | 1 | Condensador electrolítico de 100 µF (≥ 25 V) | Entre VMOT y GND, junto al A4988 |
 | 1 | Resistencia de 10 kΩ | Pull-up de ENABLE a 5 V |
@@ -53,7 +53,7 @@ PetFilamento/
 
 ## Pines
 
-| Pin del Nano | Conectado a | Función |
+| Pin del Uno | Conectado a | Función |
 |---|---|---|
 | D2 | A4988 STEP | Pulsos de paso |
 | D3 | A4988 DIR | Dirección (la maneja AccelStepper) |
@@ -62,7 +62,7 @@ PetFilamento/
 | A0 | Cursor del potenciómetro | Velocidad |
 | A1 | Divisor del termistor | Temperatura de la boquilla |
 | 5V | A4988 VDD, potenciómetro, divisor, relé VCC | Lógica |
-| VIN | +12 V del adaptador | Alimentación del Nano |
+| Jack o VIN | +12 V del adaptador | Alimentación del Uno (usa uno de los dos, no ambos) |
 | GND | GND común | Todas las tierras unidas |
 
 ## Diagrama de cableado
@@ -74,7 +74,7 @@ Detalle completo en [docs/cableado.md](docs/cableado.md).
                                             │                      │
                                          [100 µF]                  │
                                             │                      │
-  ┌──────────── ARDUINO NANO ───────┐    ┌──┴─────── A4988 ─────┐  │
+  ┌──────────── ARDUINO UNO ────────┐    ┌──┴─────── A4988 ─────┐  │
   │ VIN ◄──── +12 V ────────────────┼────┼──────────────────────┼──┘
   │ GND ─────── GND común ──────────┼────┤ GND (lógica y motor) │
   │                                 │    │ VMOT ◄── +12 V       │
@@ -111,6 +111,10 @@ Detalle completo en [docs/cableado.md](docs/cableado.md).
   (NO usar el contacto NO)
 ```
 
+En lugar del pin VIN, el Uno también puede alimentarse por su jack de 12 V
+(centro positivo). VMOT siempre se toma directo del adaptador, nunca del pin
+VIN del Uno.
+
 ## Compilar y flashear
 
 ### Arduino IDE
@@ -118,9 +122,8 @@ Detalle completo en [docs/cableado.md](docs/cableado.md).
 1. Instala la librería **AccelStepper** (Herramientas → Administrar
    bibliotecas → busca "AccelStepper", de Mike McCauley).
 2. Abre `firmware/PetFilamento/PetFilamento.ino`.
-3. Placa: **Arduino Nano**. Procesador: **ATmega328P (Old Bootloader)**. Si
-   falla la subida, prueba con **ATmega328P** (bootloader nuevo).
-4. Elige el puerto y sube el sketch.
+3. Placa: **Arduino Uno**.
+4. Elige el puerto y sube el sketch (ver "Programación por USB" más abajo).
 5. Abre el Monitor Serie a **115200** baudios.
 
 ### arduino-cli
@@ -128,19 +131,24 @@ Detalle completo en [docs/cableado.md](docs/cableado.md).
 ```bash
 arduino-cli lib install AccelStepper
 
-# Bootloader viejo (la mayoría de los clones):
-arduino-cli compile --fqbn arduino:avr:nano:cpu=atmega328old firmware/PetFilamento
-arduino-cli upload  --fqbn arduino:avr:nano:cpu=atmega328old -p /dev/ttyUSB0 firmware/PetFilamento
-
-# Bootloader nuevo: usa cpu=atmega328
-arduino-cli compile --fqbn arduino:avr:nano:cpu=atmega328 firmware/PetFilamento
+arduino-cli compile --fqbn arduino:avr:uno firmware/PetFilamento
+arduino-cli upload  --fqbn arduino:avr:uno -p /dev/ttyACM0 firmware/PetFilamento
 
 # Monitor serie
-arduino-cli monitor -p /dev/ttyUSB0 -c baudrate=115200
+arduino-cli monitor -p /dev/ttyACM0 -c baudrate=115200
 ```
 
-El puerto puede ser `/dev/ttyUSB0` o `/dev/ttyACM0` en Linux y `COMx` en
-Windows.
+En Linux el puerto suele ser `/dev/ttyACM0` en el Uno original y
+`/dev/ttyUSB0` en clones con chip CH340. En Windows es `COMx`.
+
+### Programación por USB
+
+- **Uno original:** conmuta solo entre USB y fuente externa. Puedes conectar
+  el USB con el adaptador de 12 V enchufado.
+- **Clon:** puede no tener ese circuito de conmutación. **Apaga la máquina**
+  (desenchufa el adaptador de 12 V y la pistola) **antes de conectar el USB.**
+- En ambos casos, la pistola debe estar desenchufada mientras programas:
+  durante la subida el tope de temperatura no funciona.
 
 ### Opciones de compilación
 
@@ -148,9 +156,10 @@ Están al inicio del `.ino`:
 
 - `#define DEBUG_SERIAL` (activa por defecto): imprime una línea de estado
   cada 500 ms. Los mensajes de falla se envían siempre.
-- `// #define USAR_WATCHDOG` (desactivada): watchdog de 2 s. Está desactivado
-  porque, con el bootloader viejo, un reinicio por watchdog puede dejar el
-  Nano en un bucle de reinicios.
+- `// #define USAR_WATCHDOG` (desactivada): watchdog de 2 s. El Uno con
+  Optiboot lo soporta, pero hay que probarlo en banco (sin 110 V) antes de
+  activarlo. Algunos clones traen otro bootloader y pueden quedar en un bucle
+  de reinicios tras un reset por watchdog.
 
 Ejemplo de la línea de estado:
 
@@ -193,7 +202,7 @@ cambias el hardware: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C),
   ADC < 5 = corto), la pistola se corta enseguida. Si sigue así durante 3
   evaluaciones seguidas, o si T supera **TEMP_FALLA_C**, entra en **FALLA
   enclavada**: relé activo, motor frenado con rampa y deshabilitado, y un aviso
-  por Serial cada 2 s. Solo sale reiniciando el Nano.
+  por Serial cada 2 s. Solo sale reiniciando el Uno.
 
 ## Seguridad
 
@@ -203,7 +212,7 @@ cambias el hardware: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C),
   existiera. El relé solo se activa para cortar. Así, la bobina pasa la mayor
   parte del tiempo apagada y no se calienta. Además, un fallo del Arduino o del
   relé deja la pistola como una pistola normal, que se protege sola. La
-  contrapartida es que **si el Nano se apaga o se cuelga, el tope deja de
+  contrapartida es que **si el Uno se apaga o se cuelga, el tope deja de
   funcionar**. Por eso las protecciones propias de la pistola son
   imprescindibles.
 - **No quites el PTC ni el termostato de la pistola.** Son la protección

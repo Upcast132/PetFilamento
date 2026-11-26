@@ -2,7 +2,7 @@
 
 Pines fijos. Si cambias alguno, también hay que cambiar el firmware.
 
-**Regla general:** todas las tierras (GND del adaptador de 12 V, del Nano, del
+**Regla general:** todas las tierras (GND del adaptador de 12 V, del Uno, del
 A4988, del potenciómetro, del termistor y del relé) van unidas en un solo punto
 común.
 
@@ -10,15 +10,22 @@ común.
 
 | Desde | Hacia | Notas |
 |---|---|---|
-| Adaptador +12 V | Nano VIN | El regulador del Nano genera los 5 V |
+| Adaptador +12 V | Jack del Uno (centro positivo) **o** pin VIN | Usa uno de los dos. El Uno acepta de 7 a 12 V; su regulador genera los 5 V |
 | Adaptador +12 V | A4988 VMOT | Potencia del motor |
-| Adaptador GND | Nano GND y A4988 GND (de motor) | GND común |
+| Adaptador GND | Uno GND y A4988 GND (de motor) | GND común |
 | Condensador de 100 µF | Entre VMOT (+) y GND (−) | **Lo más cerca posible del A4988.** Respeta la polaridad. Protege el driver de picos de tensión |
-| Nano 5V | A4988 VDD, potenciómetro, divisor del termistor, relé VCC | Lógica |
+| Uno 5V | A4988 VDD, potenciómetro, divisor del termistor, relé VCC | Lógica |
 
-> El pin 5V del Nano, alimentado desde VIN, da poca corriente (el regulador se
-> calienta con 12 V de entrada). La bobina del relé consume unos 70–80 mA, y
-> eso entra dentro de lo razonable. No le cuelgues más cargas.
+> **VMOT se toma directo del adaptador**, con un cable en Y o una bornera. No
+> lo saques del pin VIN del Uno: con el jack, VIN pasa por el diodo de
+> protección de la placa, que no está pensado para la corriente del motor.
+
+> Con 12 V de entrada, el regulador del Uno se calienta si se le pide mucha
+> corriente por el pin 5V. La bobina del relé consume unos 70–80 mA, y eso entra
+> dentro de lo razonable junto con la lógica. No le cuelgues más cargas.
+
+> **Programación por USB:** el Uno original conmuta solo entre USB y fuente
+> externa. En un clon, apaga la máquina antes de conectar el USB.
 
 > **Nunca conectes ni desconectes el motor con el A4988 alimentado.** El driver
 > se puede quemar.
@@ -27,15 +34,15 @@ común.
 
 | Pin del A4988 | Conectar a |
 |---|---|
-| STEP | Nano D2 |
-| DIR | Nano D3 |
-| ENABLE | Nano D4 **y** resistencia de 10k a 5 V (pull-up) |
+| STEP | Uno D2 |
+| DIR | Uno D3 |
+| ENABLE | Uno D4 **y** resistencia de 10k a 5 V (pull-up) |
 | MS1 | 5 V |
 | MS2 | 5 V |
 | MS3 | GND |
 | RESET | Puenteado con SLEEP |
 | SLEEP | Puenteado con RESET |
-| VDD | 5 V del Nano |
+| VDD | 5 V del Uno |
 | GND (lógica) | GND común |
 | VMOT | +12 V, con 100 µF a GND |
 | GND (motor) | GND común |
@@ -51,7 +58,7 @@ la otra a 2A/2B. Si el motor gira al revés, cambia `DIRECCION_INVERTIDA` en el
 firmware. No hace falta recablear.
 
 **ENABLE:** es activo en bajo. El pull-up de 10k lo mantiene deshabilitado
-(HIGH) mientras el Nano arranca o se está programando, así que el motor no
+(HIGH) mientras el Uno arranca o se está programando, así que el motor no
 recibe corriente hasta que el firmware lo habilita.
 
 ## 3. Potenciómetro B50K
@@ -77,7 +84,7 @@ extremos.
 
 - El NTC va del nodo A1 a GND. La resistencia de 4.7k va del nodo A1 a 5 V.
 - El condensador de 100 nF va en paralelo al termistor, lo más cerca posible
-  del Nano, para filtrar ruido.
+  del Uno, para filtrar ruido.
 - **Montaje:** pega el termistor al metal de la boquilla con cinta Kapton (no
   con cinta común, que se derrite). Aísla sus patas con funda de alta
   temperatura (fibra de vidrio o teflón) para que no hagan corto con la
@@ -95,9 +102,9 @@ termistor desconectado. Por debajo de 5, como cortocircuito.
 
 | Pin del módulo | Conectar a |
 |---|---|
-| VCC | 5 V del Nano |
+| VCC | 5 V del Uno |
 | GND | GND común |
-| IN | Nano D5 |
+| IN | Uno D5 |
 
 Si el módulo tiene un puente para elegir disparo en alto o en bajo (H/L),
 anota en qué posición está y comprueba el nivel en el paso 1 de
@@ -137,7 +144,7 @@ TIERRA (si hay) ─────────────────────�
                                             │                      │
                                          [100 µF]                  │
                                             │                      │
-  ┌──────────── ARDUINO NANO ───────┐    ┌──┴─────── A4988 ─────┐  │
+  ┌──────────── ARDUINO UNO ────────┐    ┌──┴─────── A4988 ─────┐  │
   │ VIN ◄──── +12 V ────────────────┼────┼──────────────────────┼──┘
   │ GND ─────── GND común ──────────┼────┤ GND (lógica y motor) │
   │                                 │    │ VMOT ◄── +12 V       │
