@@ -38,7 +38,7 @@ común.
 | DIR | Uno D3 |
 | ENABLE | Uno D4 **y** resistencia de 10k a 5 V (pull-up) |
 | MS1 | 5 V |
-| MS2 | 5 V |
+| MS2 | GND |
 | MS3 | GND |
 | RESET | Puenteado con SLEEP |
 | SLEEP | Puenteado con RESET |
@@ -49,8 +49,9 @@ común.
 | 1A, 1B | Bobina A del NEMA 17 |
 | 2A, 2B | Bobina B del NEMA 17 |
 
-Con MS1 = H, MS2 = H y MS3 = L el A4988 trabaja en **1/8 de paso**: 200 × 8 =
-1600 micropasos por vuelta del motor.
+Con MS1 = H, MS2 = L y MS3 = L el A4988 trabaja en **medio paso**: 200 × 2 =
+400 micropasos por vuelta del motor. Con el reductor 60:1, una vuelta del
+tambor son 400 × 60 = 24 000 pasos.
 
 **Cómo identificar las bobinas:** con el multímetro en continuidad, los dos
 cables que marcan continuidad entre sí son una bobina. Una bobina va a 1A/1B y
@@ -153,8 +154,8 @@ TIERRA (si hay) ─────────────────────�
   │ D4 ──┼──────┴───────────────────┼────┘                      │
   │ D2 ──┼──────────────────────────┼────► STEP          1A/1B ─┼──► bobina A ┐
   │ D3 ──┼──────────────────────────┼────► DIR           2A/2B ─┼──► bobina B ┤ NEMA 17
-  │      │                          │      MS1, MS2 ── 5 V      │             ┘
-  │      │                          │      MS3 ─────── GND      │
+  │      │                          │      MS1 ─────── 5 V      │             ┘
+  │      │                          │      MS2, MS3 ── GND      │
   │      │                          │      RESET ── SLEEP       │
   │      │                          │    └──────────────────────┘
   │      │   POTENCIÓMETRO B50K     │

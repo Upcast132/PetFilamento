@@ -2,7 +2,8 @@
  * PetFilamento.ino
  * ---------------------------------------------------------------------------
  * Firmware para la máquina que convierte tiras de botellas PET en filamento
- * de 1.75 mm (mecánica PetPull-2 de Sapienz, Thingiverse 4900782).
+ * de 1.75 mm. Mecánica: NEMA 17 con reductor de engranajes de módulo 2
+ * (60:1, tres etapas) que mueve un tambor de 74 mm de diámetro.
  *
  * El Arduino Uno hace SOLO dos cosas:
  *   1. Controla la velocidad del motor NEMA 17 (A4988) según un potenciómetro.
@@ -49,10 +50,15 @@
 
 // --- Motor y mecánica -------------------------------------------------------
 
-// CALIBRAR: vueltas del MOTOR por cada vuelta del CARRETE. Se obtiene contando
-// los dientes del reductor: producto de (dientes conducido / dientes motriz)
-// de cada etapa. 1.0 es un valor provisional.
-const float RELACION_REDUCCION = 1.0;
+// Vueltas del MOTOR por cada vuelta del CARRETE (el tambor). Reductor de
+// módulo 2 con tres etapas, producto de (dientes conducido / dientes motriz):
+//   32/8 x 36/12 x 55/11 = 4 x 3 x 5 = 60
+const float RELACION_REDUCCION = 60.0;
+
+// Diámetro del tambor, en mm. Solo se usa para mostrar la velocidad lineal
+// por Serial (rpm_carrete x pi x diámetro / 1000 = m/min); no cambia el
+// control. Es la velocidad con el tambor vacío: sube al llenarse.
+const float DIAMETRO_TAMBOR_MM = 74.0;
 
 // CALIBRAR: velocidad del carrete con el potenciómetro justo encima de la
 // zona muerta y al máximo, en rpm del CARRETE. Valores conservadores.
@@ -67,7 +73,7 @@ const bool DIRECCION_INVERTIDA = false;
 
 // Datos fijos del motor y del driver (no requieren calibración).
 const int PASOS_POR_VUELTA_MOTOR = 200;  // NEMA 17, 1.8° por paso
-const int MICROPASOS = 8;                // MS1=H, MS2=H, MS3=L -> 1/8 de paso
+const int MICROPASOS = 2;                // MS1=H, MS2=L, MS3=L -> medio paso (1/2)
 
 // Límite superior fijo para AccelStepper. Se pasa a setMaxSpeed() UNA sola
 // vez en setup(); setSpeed() recorta cualquier valor por encima de este.
@@ -210,14 +216,18 @@ void actualizarLecturas() {
 
 // Convierte rpm del carrete a pasos (de micropaso) por segundo:
 //
-//   pasos/s = rpm_carrete x RELACION_REDUCCION x 200 x 8 / 60
+//   pasos/s = rpm_carrete x RELACION_REDUCCION x 200 x 2 / 60
 //
 //   - rpm_carrete x RELACION_REDUCCION = rpm del eje del motor.
 //   - x 200: pasos completos por vuelta del NEMA 17.
-//   - x 8:   micropasos por paso completo (A4988 en 1/8).
+//   - x 2:   micropasos por paso completo (A4988 en medio paso).
 //   - / 60:  de "por minuto" a "por segundo".
 //
-// Ejemplo: 4 rpm de carrete con reducción 1.0 -> 4 x 1 x 1600 / 60 = 106.7 pasos/s.
+// Comprobación con los valores actuales:
+//   máximo: 4 rpm   -> 4 x 60 x 200 x 2 / 60   = 1600 pasos/s (< 2000, sin recorte)
+//   mínimo: 0.5 rpm -> 0.5 x 60 x 200 x 2 / 60 =  200 pasos/s
+// Con reducción 60:1, el límite de 2000 pasos/s equivale a 5 rpm de carrete:
+// si subes VELOCIDAD_MAX_RPM_CARRETE por encima de 5, se recorta.
 float rpmCarreteAPasosS(float rpmCarrete) {
   return rpmCarrete * RELACION_REDUCCION * PASOS_POR_VUELTA_MOTOR * MICROPASOS / 60.0;
 }
@@ -355,7 +365,9 @@ void evaluarTemperatura() {
 void imprimirEstado() {
   Serial.print(F("rpm_obj="));
   Serial.print(rpmCarreteObjetivo, 2);
-  Serial.print(F(" pot="));
+  Serial.print(F(" v="));
+  Serial.print(rpmCarreteObjetivo * PI * DIAMETRO_TAMBOR_MM / 1000.0, 2);
+  Serial.print(F("m/min pot="));
   Serial.print((int)adcPotFiltrado);
   Serial.print(F(" T="));
   if (lecturaTermistorValida) {

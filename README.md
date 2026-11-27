@@ -2,9 +2,10 @@
 
 Máquina escolar que convierte tiras de botellas PET en filamento de 1.75 mm
 para impresión 3D. La tira se jala a través de la boquilla caliente de una
-pistola de silicón. Un carrete, movido por un motor NEMA 17 con un reductor de
-engranajes impreso, enrolla el filamento. La mecánica es la del **PetPull-2**
-de Sapienz.
+pistola de silicón, montada en un soporte impreso y con la boquilla perforada
+a 1.6 mm. El filamento se enrolla en un tambor de 74 mm de diámetro. Lo mueve
+un motor NEMA 17 a través de un reductor impreso de engranajes de módulo 2,
+con una relación total de **60:1** en tres etapas (8→32, 12→36 y 11→55).
 
 Un Arduino Uno hace dos cosas:
 
@@ -18,8 +19,8 @@ Un Arduino Uno hace dos cosas:
 > [docs/puesta-en-marcha.md](docs/puesta-en-marcha.md) antes de usarla.
 
 Licencia: MIT (ver [LICENSE](LICENSE)). Cubre el firmware y la documentación
-de este repositorio. Las piezas del PetPull-2 y del PETamentor2 tienen sus
-propias licencias (ver Créditos).
+de este repositorio. Las piezas impresas de terceros tienen sus propias
+licencias (ver Créditos).
 
 ---
 
@@ -41,7 +42,7 @@ PetFilamento/
 |---|---|---|
 | 1 | Arduino Uno (ATmega328P) | 12 V por el jack (centro positivo; el Uno acepta de 7 a 12 V) o por VIN |
 | 1 | Adaptador de 12 V | Alimenta el Uno (jack o VIN) y el motor (VMOT) |
-| 1 | Driver A4988 | En 1/8 de paso (MS1 y MS2 en alto, MS3 en bajo) |
+| 1 | Driver A4988 | En medio paso (MS1 a 5 V, MS2 y MS3 a GND) |
 | 1 | Condensador electrolítico de 100 µF (≥ 25 V) | Entre VMOT y GND, junto al A4988 |
 | 1 | Resistencia de 10 kΩ | Pull-up de ENABLE a 5 V |
 | 1 | Motor NEMA 17 bipolar | 200 pasos por vuelta |
@@ -52,7 +53,41 @@ PetFilamento/
 | 1 | Módulo de relé de 5 V, 1 canal | Por COM y NC en la línea viva de la pistola |
 | 1 | Pistola de silicón grande, nueva, de 110 V | Con su propio cable y su PTC |
 | 1 | Caja cerrada para la parte de 110 V | Ver la sección Seguridad |
-| — | Piezas impresas del PetPull-2 | Carrete, reductor y soportes |
+| — | Piezas impresas | Reductor 60:1 de módulo 2, tambor de 74 mm, soporte de la pistola y soportes |
+
+### Piezas no impresas
+
+| Cant. | Pieza | Notas |
+|---|---|---|
+| 3 | Varillas roscadas M8, con tuercas y arandelas | Estructura y ejes |
+| 2 | Rodamientos 608 | 8 mm de diámetro interior, para las varillas M8 |
+| 4 | Tornillos M3 de 8 a 10 mm | Fijación del NEMA 17 |
+| 8 | Tornillos M4 | Unen el tambor al engranaje grande. El largo se mide al armar |
+| 1 | Base de madera | Para montar todo |
+| 1 | Cinta Kapton | Para fijar el termistor a la boquilla |
+| 1 | Broca de 1.6 mm | Para perforar la boquilla |
+| 1 | Cortador de botellas con cuchilla | Para sacar las tiras |
+
+## Mecánica y velocidades
+
+| Etapa | Motriz → conducido | Relación |
+|---|---|---|
+| 1 | 8 → 32 dientes | 4:1 |
+| 2 | 12 → 36 dientes | 3:1 |
+| 3 | 11 → 55 dientes | 5:1 |
+| **Total** | | **60:1** |
+
+Con el A4988 en medio paso, una vuelta del tambor son 200 × 2 × 60 = 24 000
+pasos.
+
+| rpm del tambor | Pasos/s del motor | Velocidad lineal (tambor vacío) |
+|---|---|---|
+| 0.5 (mínimo por defecto) | 200 | 0.12 m/min |
+| 4.0 (máximo por defecto) | 1600 | 0.93 m/min |
+| 5.0 (límite del firmware) | 2000 | 1.16 m/min |
+
+La velocidad lineal es rpm × π × 74 mm / 1000. La línea de Serial la muestra
+solo como dato informativo; no se usa en el control.
 
 ## Pines
 
@@ -86,8 +121,8 @@ Detalle completo en [docs/cableado.md](docs/cableado.md).
   │ D4 ──┼──────┴───────────────────┼────┘                      │
   │ D2 ──┼──────────────────────────┼────► STEP          1A/1B ─┼──► bobina A ┐
   │ D3 ──┼──────────────────────────┼────► DIR           2A/2B ─┼──► bobina B ┤ NEMA 17
-  │      │                          │      MS1, MS2 ── 5 V      │             ┘
-  │      │                          │      MS3 ─────── GND      │
+  │      │                          │      MS1 ─────── 5 V      │             ┘
+  │      │                          │      MS2, MS3 ── GND      │
   │      │                          │      RESET ── SLEEP       │
   │      │                          │    └──────────────────────┘
   │      │   POTENCIÓMETRO B50K     │
@@ -167,7 +202,7 @@ Están al inicio del `.ino`:
 Ejemplo de la línea de estado:
 
 ```
-rpm_obj=2.35 pot=520 T=187.4C rele=normal driver=ON falla=NO
+rpm_obj=2.35 v=0.55m/min pot=520 T=187.4C rele=normal driver=ON falla=NO
 ```
 
 ## Constantes de calibración
@@ -181,14 +216,14 @@ una medición.
 | `R_PULLUP` | 4700 Ω | La resistencia real de 4.7k, medida con el multímetro antes de soldarla |
 | `TEMP_OFFSET_C` | 0.0 °C | La diferencia entre la lectura por Serial y un termómetro de referencia |
 | `TEMP_TOPE_C` | 230 °C | La temperatura máxima que alcanza la pistola sola, más un margen. El tope debe quedar por encima de la temperatura de trabajo y por debajo de lo que daña el plástico o la boquilla |
-| `RELACION_REDUCCION` | 1.0 | Los dientes de cada engranaje del reductor: producto de (conducido / motriz) de cada etapa |
 | `VELOCIDAD_MIN_RPM_CARRETE` | 0.5 rpm | La velocidad más baja útil, buscada en la prueba de la tira |
 | `VELOCIDAD_MAX_RPM_CARRETE` | 4.0 rpm | La velocidad más alta a la que la tira todavía forma filamento redondo sin romperse |
 | `ACELERACION_PASOS_S2` | 100 pasos/s² | Subirla hasta que el motor pierda pasos al arrancar y luego dejarla en la mitad |
-| `DIRECCION_INVERTIDA` | `false` | Si el carrete gira al revés, cambiar a `true` |
+| `DIRECCION_INVERTIDA` | `false` | Si el tambor gira al revés, cambiar a `true` |
 
 Las demás constantes son fijas o de la hoja de datos. Puedes ajustarlas si
-cambias el hardware: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C),
+cambias el hardware: `RELACION_REDUCCION` (60, del reductor de tres etapas),
+`DIAMETRO_TAMBOR_MM` (74), `MICROPASOS` (2, medio paso), `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C),
 `BETA_TERMISTOR` (3950), `TEMP_HISTERESIS_C` (5 °C),
 `TIEMPO_MIN_REACTIVAR_MS` (10 s), `TEMP_FALLA_C` (300 °C), `ZONA_MUERTA_ADC`
 (15) y los filtros EMA (alfa 0.1).
@@ -232,10 +267,13 @@ cambias el hardware: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C),
 
 ## Limitaciones conocidas
 
-- **La velocidad lineal sube al llenarse el carrete.** El motor gira a rpm
-  constantes, pero el radio del carrete crece con cada vuelta, así que el
-  filamento se jala cada vez más rápido y puede adelgazarse. La v1 no lo
-  compensa: hay que ir bajando el potenciómetro a mano.
+- **La velocidad lineal sube al llenarse el tambor.** El motor gira a rpm
+  constantes, pero el radio efectivo del tambor crece con cada vuelta, así que
+  el filamento se jala cada vez más rápido y puede adelgazarse. Sigue sin
+  compensarse: hay que ir bajando el potenciómetro a mano. La velocidad que
+  muestra el Serial corresponde al tambor vacío.
+- **Cada botella da un tramo corto.** Para formar un rollo hay que empalmar
+  los tramos de varias botellas.
 - **El NTC pierde exactitud a 200 °C.** La ecuación Beta con un solo valor de B
   se aleja de la temperatura real a alta temperatura, y un NTC de 100k tiene
   muy poca resolución de ADC en esa zona. Además, el termistor mide la
@@ -248,7 +286,7 @@ cambias el hardware: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C),
 
 ## Roadmap
 
-- **Compensación del radio del carrete**: estimar el radio a partir de las
+- **Compensación del radio del tambor**: estimar el radio a partir de las
   vueltas dadas (o medirlo) y ajustar las rpm para mantener constante la
   velocidad lineal del filamento.
 

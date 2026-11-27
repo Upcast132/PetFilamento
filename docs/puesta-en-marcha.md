@@ -95,25 +95,32 @@ Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
 
 1. Con el reductor montado pero **sin tira ni pistola**, enciende con 12 V.
    Con el potenciómetro al mínimo (zona muerta), por Serial debe salir
-   `driver=OFF`, y el motor debe quedar libre: se puede girar a mano.
+   `driver=OFF`, y el eje del motor debe quedar libre. Con el reductor 60:1
+   el tambor cuesta mucho de mover a mano: no lo fuerces.
 2. Sube el potenciómetro poco a poco. Debe salir `driver=ON` y el motor debe
    acelerar suavemente. Al bajarlo de nuevo a la zona muerta, el motor frena
    con rampa y luego vuelve a `driver=OFF`.
 3. Si gira al revés, cambia `DIRECCION_INVERTIDA`.
 4. Si vibra, zumba sin girar o pierde pasos: revisa el par de cada bobina,
    sube un poco Vref o baja `ACELERACION_PASOS_S2`.
-5. Toca el disipador o el chip del A4988 tras unos minutos de uso. Debe estar
+5. **Revisa que el piñón no patine en el eje de 5 mm del NEMA 17.** Marca con
+   un rotulador una línea que cruce el eje y el piñón, y haz girar el motor con
+   el tambor frenado suavemente con la mano. Si la línea se desfasa, o el eje
+   gira y el piñón no, el piñón patina: **reimprímelo con el agujero de
+   5.2 mm** para que entre ajustado. Si el agujero queda demasiado justo,
+   ajústalo con una broca de 5 mm.
+6. Toca el disipador o el chip del A4988 tras unos minutos de uso. Debe estar
    tibio, no quemar.
-6. **Relación de reducción:** cuenta los dientes de cada engranaje.
-   - Para cada etapa: dientes del engranaje conducido ÷ dientes del motriz.
-   - `RELACION_REDUCCION` = producto de todas las etapas.
-   - Ejemplo: piñón de 10 dientes → rueda de 40 (×4), y en el mismo eje piñón
-     de 12 → rueda de 36 (×3). Relación = 4 × 3 = **12**.
-   - Compruébalo marcando el carrete con un rotulador: con el potenciómetro al
-     máximo, el carrete debe dar `VELOCIDAD_MAX_RPM_CARRETE` vueltas en un
-     minuto.
-7. Si con la relación real el motor llega al límite de 2000 pasos/s, el
-   firmware recorta la velocidad. Baja `VELOCIDAD_MAX_RPM_CARRETE`.
+7. **Comprueba la relación de reducción.** El firmware ya usa
+   `RELACION_REDUCCION = 60` (8→32, 12→36 y 11→55: 4 × 3 × 5 = 60). Cuenta los
+   dientes impresos para confirmarlo. Después marca el tambor con un
+   rotulador: con el potenciómetro al máximo, el tambor debe dar
+   `VELOCIDAD_MAX_RPM_CARRETE` vueltas en un minuto (4 con el valor por
+   defecto). Si da otra cantidad, revisa la reducción o el puente MS1/MS2/MS3
+   (medio paso: MS1 a 5 V, MS2 y MS3 a GND).
+8. Con 60:1 y medio paso, el límite de 2000 pasos/s equivale a 5 rpm de
+   tambor. Si pones `VELOCIDAD_MAX_RPM_CARRETE` por encima de 5, el firmware
+   recorta la velocidad.
 
 ## Paso 5 — Conectar los 110 V (solo después de la revisión)
 
@@ -151,15 +158,17 @@ filamento.
 
 1. **Con la pistola desenchufada y fría**, saca los restos de pegamento de la
    boquilla y del canal.
-2. Perfora la boquilla a **1.6 mm** con una broca, también con la pistola fría
-   y desenchufada. Limpia la viruta.
+2. Comprueba que la boquilla esté perforada a **1.6 mm**. Si no lo está,
+   perfórala con la broca de 1.6 mm, también con la pistola fría y
+   desenchufada, y limpia la viruta. Después monta la pistola en su soporte
+   impreso y revisa que quede firme.
 3. Prepara una tira de botella de ancho parejo y córtale la punta en forma de
    **pico** para que entre por el agujero.
 4. Enchufa la pistola, espera a que caliente y mete la punta por la boquilla.
 5. Con **pinzas**, jala la punta lentamente con la mano (sin motor) y mira el
    resultado:
    - **Sale redondo, liso y del grosor esperado** → la temperatura sirve.
-     Pasa la punta al carrete y prueba con el motor, empezando por la velocidad
+     Pasa la punta al tambor y prueba con el motor, empezando por la velocidad
      más baja.
    - **Sale plano, o la tira no pasa y se rompe** → falta temperatura. La
      pistola puede no ser suficiente (ver Limitaciones en el README).
@@ -167,9 +176,12 @@ filamento.
      Desenchufa y revisa.
 6. Con el motor en marcha, busca la velocidad a la que el filamento sale
    uniforme y anótala para `VELOCIDAD_MIN_RPM_CARRETE` y
-   `VELOCIDAD_MAX_RPM_CARRETE`. Mide el diámetro con un calibrador en varios
-   puntos.
-7. Recuerda: al llenarse el carrete la velocidad lineal sube. Ve bajando el
+   `VELOCIDAD_MAX_RPM_CARRETE`. La línea de Serial muestra la velocidad
+   lineal en m/min (con el tambor vacío). Mide el diámetro con un calibrador
+   en varios puntos.
+7. Recuerda: al llenarse el tambor la velocidad lineal sube. Ve bajando el
    potenciómetro.
+8. Cada botella da un tramo corto. Para formar un rollo hay que empalmar los
+   tramos de varias botellas.
 
 Ventila el lugar y no dejes la máquina sin supervisión en ningún momento.
