@@ -1,25 +1,31 @@
 # Modelos 3D
 
+> **Autoría:** los STL de `stl/` y el proyecto de `proyecto/` son de **3DRODV**:
+> "Máquina para hacer Filamento PET", publicada en
+> [Creality Cloud](https://www.crealitycloud.com/model-details/69b4bb67f6b153ff3e33209c)
+> con licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+> **Archivos sin modificar.** El docente asesor eligió este diseño base con el
+> equipo, por su montaje nativo de NEMA 17 y su reducción de 60:1.
+
 Piezas impresas de la máquina. El reglamento de la feria (Art. 2.1) exige
 entregar los archivos de modelado originales (STL y CAD) junto con el informe.
-
-> **Pendiente:** agregar en `fuente/` los archivos editables del programa de
-> diseño (CAD). Los STL y el proyecto del laminador no reemplazan al archivo
-> fuente.
+Los archivos editables de las piezas propias del equipo (ver
+[Piezas propias](#piezas-propias-pendientes)) irán en `fuente/`.
 
 ## Organización
 
 ```
 cad/
-├── stl/        # piezas listas para imprimir (.stl)
-├── proyecto/   # proyecto de Creality Print (.3mf): hay que re-laminarlo para la Ender-3 V3 SE
-└── fuente/     # archivos editables del programa de diseño (pendiente)
+├── stl/        # piezas de 3DRODV listas para imprimir (.stl), sin modificar
+├── proyecto/   # proyecto de Creality Print (.3mf) de 3DRODV: hay que re-laminarlo para la Ender-3 V3 SE
+└── fuente/     # .FCStd (FreeCAD) de las piezas propias del equipo (pendiente)
 ```
 
 ## Piezas
 
-Medidas tomadas de los STL. Las dimensiones generales y los agujeros se
-midieron con un script que corta las mallas y ajusta círculos.
+Las medidas, los dientes y los ajustes de las tablas son un análisis del equipo
+sobre los STL de 3DRODV. Las dimensiones generales y los agujeros se midieron
+con un script que corta las mallas y ajusta círculos.
 
 | Archivo | Pieza | Medidas (mm) | Detalles medidos |
 |---|---|---|---|
@@ -44,10 +50,22 @@ y la relación 60:1 del firmware.
 |---|---|---|---|
 | Piñón en el eje del NEMA 17 | Eje Ø 5 con plano (cota D 4.5) | Ø 5.96, cota D 5.39 | ~1 mm de holgura: el piñón puede bailar. Propuesta: Ø 5.2 y cota D 4.7 |
 | Rodamiento 608 en G46 | Ø 22 | Ø 22.96 | ~1 mm de holgura: pegar el rodamiento o reimprimir el alojamiento a ~Ø 22.2 |
-| Tornillos tambor–rueda | M4 | Rueda Ø 4.56 (paso), tambor Ø 2.55 | El tambor tiene agujeros de piloto para M3. Para M4, repasar a Ø 3.3 con broca |
+| Tornillos tambor–rueda | M3 autorroscantes | Rueda Ø 4.56 (paso), tambor Ø 2.55 (piloto) | Los tornillos pasan por la rueda y muerden el piloto del tambor. No hace falta rediseñarlo |
 | Ruedas en las varillas M8 | Ø 8 | Ø 8.5 | +0.5 mm: giran libres. Correcto |
 | Varillas M8 en las placas | Ø 8 | Ø 8.0 | Sin holgura: quedan fijas. Si no entran, repasar con broca de 8 mm |
 | Motor en las placas y en G50 | Patrón de 31 mm, M3 | Ranuras Ø 3.4 de 10 mm | Permiten ajustar la distancia del engrane. Correcto |
+
+## Piezas propias (pendientes)
+
+Diseño del equipo en FreeCAD. Los `.FCStd` y los STL exportados de estas piezas
+irán en `fuente/`, para no mezclarlos con los de 3DRODV. Licencia MIT.
+
+| Pieza | Qué hay que hacer |
+|---|---|
+| Piñón corregido (reemplaza a `G51`) | Agujero en D de Ø 5.2 con el plano a 4.7 mm, para el eje de 5 mm del NEMA 17. **Rediseñar solo si la impresión de prueba de `G51` baila en el eje** |
+| Alojamiento del 608 en `G46` | Ø 22.2 en lugar de Ø 22.96. **Rediseñar solo si la impresión de prueba queda floja** |
+| Soporte de la pistola de silicón | Fija la pistola con su boquilla perforada a 1.6 mm |
+| Caja de la electrónica | Arduino Uno (68.6 × 53.4 mm, agujeros de Ø 3.2), A4988, potenciómetro, entrada del adaptador de 12 V y salida de los cables del motor |
 
 ## Parámetros de impresión
 

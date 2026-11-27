@@ -42,16 +42,17 @@
     <b>Institución:</b> <span class="pend">[Nombre de la institución]</span>
     <b>Integrantes:</b> <span class="pend">[Nombres de los integrantes]</span>
     <b>Docente asesor:</b> <span class="pend">[Nombre del docente]</span>
-    <b>Repositorio:</b> <span>github.com/Upcast132/PetFilamento (firmware, documentación y modelos)</span>
+    <b>Repositorio:</b> <span>github.com/Upcast132/PetFilamento (firmware, documentación y archivos de modelado)</span>
   </div>
 </div>
 
 <h2>1. Resumen</h2>
 <p>PetFilamento convierte tiras cortadas de botellas PET en filamento de 1.75 mm para impresoras 3D. La tira se jala
 a través de la boquilla caliente de una pistola de silicón, perforada a 1.6 mm, y el filamento formado se enrolla en
-un tambor. El tambor lo mueve un motor paso a paso NEMA 17 a través de un reductor de engranajes de 60:1 diseñado e
-impreso por el equipo. Un Arduino Uno controla la velocidad de enrollado con un potenciómetro. El proyecto busca
-reutilizar un residuo muy común y abaratar el material de impresión del club o del colegio.</p>
+un tambor. El tambor lo mueve un motor paso a paso NEMA 17 a través de un reductor de engranajes de 60:1, basado en el
+diseño abierto de 3DRODV (sección 4) e impreso por el equipo. Un Arduino Uno controla la velocidad de enrollado con un
+potenciómetro. El proyecto busca reutilizar un residuo muy común y abaratar el material de impresión del club o del
+colegio.</p>
 
 <h2>2. Problema y aplicabilidad</h2>
 <p>Las botellas PET son uno de los residuos plásticos más abundantes, y el filamento para impresión 3D es un gasto
@@ -110,10 +111,13 @@ robótica o un colegio con impresora 3D consume varios rollos al año en prototi
       y la velocidad lineal del filamento en m/min.</li>
 </ul>
 
-<h2>4. Diseño y modelado propio</h2>
-<p>Las 11 piezas impresas fueron diseñadas por el equipo en <span class="pend">[programa de CAD]</span> y se entregan en
-STL, en el proyecto del laminador y en archivo fuente. Se diseñaron para materiales que se consiguen fácilmente:
-varillas M8, rodamientos 608 y tornillería M3/M4. Las medidas de esta sección se tomaron de los STL.</p>
+<h2>4. Diseño mecánico y análisis</h2>
+<p>La mecánica base son 11 piezas impresas del diseño abierto «Máquina para hacer Filamento PET» de <b>3DRODV</b>,
+publicado en Creality Cloud con licencia CC BY 4.0, que usamos <b>sin modificar</b>. El docente asesor lo eligió con el
+equipo frente a otras opciones, como PetPull-2, porque trae montaje nativo de NEMA 17 y reducción de 60:1. Está pensado
+para materiales que se consiguen fácilmente: varillas M8, rodamientos 608 y tornillería M3/M4. El análisis de esta
+sección (medidas tomadas de los STL, engranajes y tolerancias) es del equipo; las piezas que diseñamos nosotros están
+en 4.4.</p>
 <table>
   <tr><th>Pieza</th><th>Medidas (mm)</th><th>Pieza</th><th>Medidas (mm)</th></tr>
   <tr><td>Piñón del motor (8 dientes)</td><td>Ø 20 × 28</td><td>Tambor</td><td>Ø 74 × 60</td></tr>
@@ -141,9 +145,9 @@ es baja, pero en las pruebas conviene vigilar el desgaste del piñón de 8 dient
   <tr><td>Ruedas sobre las varillas M8</td><td>Ø 8</td><td>Ø 8.5</td><td>+0.5 mm: giran libres sobre la varilla</td></tr>
   <tr><td>Varillas M8 en las placas</td><td>Ø 8</td><td>Ø 8.0</td><td>Sin holgura: las varillas quedan fijas</td></tr>
   <tr><td>Motor en placas y soporte</td><td>Patrón NEMA 17 de 31 mm, M3</td><td>Ranuras Ø 3.4 de 10 mm</td><td>Permiten ajustar la distancia del engrane</td></tr>
-  <tr><td>Piñón en el eje del motor</td><td>Eje Ø 5, plano a 4.5</td><td>D: Ø 5.96, plano a 5.39</td><td>~1 mm de holgura; corrección propuesta: Ø 5.2 / 4.7</td></tr>
+  <tr><td>Piñón en el eje del motor</td><td>Eje Ø 5, plano a 4.5</td><td>D: Ø 5.96, plano a 5.39</td><td>~1 mm de holgura; corrección propia en 4.4 (Ø 5.2 / 4.7)</td></tr>
   <tr><td>Rodamiento 608</td><td>Ø 22</td><td>Ø 22.96</td><td>~1 mm de holgura; se fija con pegamento o se reimprime a ~Ø 22.2</td></tr>
-  <tr><td>Tambor a rueda de 55 (8 tornillos M4)</td><td>M4</td><td>Rueda Ø 4.56; tambor Ø 2.55</td><td>Piloto de M3 en el tambor: para M4 se repasa a Ø 3.3</td></tr>
+  <tr><td>Tambor a rueda de 55 (8 tornillos M3)</td><td>M3 autorroscante</td><td>Rueda Ø 4.56; tambor Ø 2.55</td><td>Pasan por la rueda y muerden el piloto del tambor; no hace falta rediseñarlo</td></tr>
   <tr><td>Fijación a la base</td><td>M4</td><td>Ø 4 avellanado a Ø 9</td><td>La cabeza queda embutida</td></tr>
 </table>
 <p class="nota">Impresión: Creality Ender-3 V3 SE con boquilla de 0.4 mm, PLA, capa de 0.2 mm, 2 paredes, 15 % de
@@ -154,25 +158,37 @@ tiempo de impresión: <span class="pend">[horas en la Ender-3 V3 SE]</span>.</p>
 0.12 y 0.93 m/min, y el motor trabaja a entre 200 y 1600 pasos/s, por debajo del límite de 2000 pasos/s del firmware.
 La fuerza sobra: con un motor de unos 0.4 N·m y la reducción de 60:1, el tambor podría tirar con varios cientos de
 newtons, así que el límite real es la resistencia de los dientes impresos, no el motor.</p>
+<h3>4.4 Piezas propias</h3>
+<p style="break-after:avoid">Piezas que el equipo diseña en <span class="pend">[FreeCAD]</span> para corregir o completar la mecánica base. Los
+archivos <code>.FCStd</code> se entregan en <code>cad/fuente/</code>.</p>
+<table>
+  <tr><th>Pieza</th><th>Qué resuelve</th><th>Medidas</th><th>Foto</th></tr>
+  <tr><td>Piñón corregido</td><td>Agujero en D de Ø 5.2 con plano a 4.7 mm para el eje de 5 mm (se rediseña si el piñón original baila en la prueba)</td><td><span class="pend">[medidas]</span></td><td><span class="pend">[foto]</span></td></tr>
+  <tr><td>Soporte de la pistola de silicón</td><td>Fija la pistola con su boquilla perforada a 1.6 mm</td><td><span class="pend">[medidas]</span></td><td><span class="pend">[foto]</span></td></tr>
+  <tr><td>Caja de la electrónica</td><td>Aloja el Arduino Uno, el A4988 y el potenciómetro, con entrada del adaptador de 12 V y salida de los cables del motor</td><td><span class="pend">[medidas]</span></td><td><span class="pend">[foto]</span></td></tr>
+</table>
 
 <h2>5. Originalidad e innovación</h2>
-<p>La idea de jalar una tira de botella por una boquilla caliente ya existe en la comunidad maker. Nuestro aporte está
-en cómo la resolvimos con materiales baratos y piezas propias:</p>
+<p>La idea de jalar una tira de botella por una boquilla caliente ya existe en la comunidad maker, y la mecánica base
+es el diseño abierto de 3DRODV (sección 4). Nuestro aporte está en la fuente de calor, el control y el análisis,
+resueltos con materiales baratos:</p>
 <ul>
   <li><b>Pistola de silicón como fuente de calor.</b> Cuesta unos $7.29 y se consigue en cualquier ferretería o
       papelería. Ya trae su propio PTC, así que no necesita un sensor ni un control de temperatura. Como referencia, un
       extrusor de impresora 3D (MK8, 12 V) cuesta $40.40 y además necesita un controlador.</li>
-  <li><b>Modelos 3D propios:</b> el reductor de 60:1 en tres etapas, el tambor de 74 mm y el soporte de la pistola,
-      diseñados para varillas M8, rodamientos 608 y una base de madera.</li>
   <li><b>Firmware propio</b> con rampa de aceleración, zona muerta, apagado del driver en reposo y velocidad lineal en
       tiempo real.</li>
   <li><b>Mejora opcional ya programada:</b> un tope de seguridad de temperatura con termistor y relé (sección 8).</li>
+  <li><b>Análisis de la mecánica con correcciones:</b> comprobamos dientes, diámetros y ajustes sobre los STL y
+      detectamos errores de ajuste, como la holgura del piñón en el eje del motor (sección 4.2).</li>
+  <li><b>Piezas propias</b>, en diseño: piñón corregido, soporte de la pistola y caja de la electrónica (sección 4.4).</li>
 </ul>
-<div class="caja"><b>Uso de inteligencia artificial.</b> Los modelos 3D los diseñó el equipo; en ellos usamos un
-asistente de inteligencia artificial (Claude, de Anthropic) solo para revisar medidas y detectar pequeños errores de ajuste
-(sección 4.2). El firmware y la documentación, en cambio, los redactó en su mayor parte la IA a partir de lo que el
-equipo definió: componentes, pines, comportamiento del motor y criterios de seguridad. El equipo los revisó, probó y
-ajustó en la máquina.</div>
+<div class="caja"><b>Uso de inteligencia artificial.</b> Usamos un asistente de inteligencia artificial (Claude, de
+Anthropic) para medir los STL de la mecánica base, detectar errores de ajuste (sección 4.2) y redactar la mayor parte
+del firmware y la documentación, a partir de lo que el equipo definió: componentes, pines, comportamiento del motor y
+criterios de seguridad. La idea de usar la pistola de silicón como fuente de calor y la elección del diseño base,
+con el docente asesor, son del equipo. El equipo revisó el firmware y la documentación; su prueba en la máquina está
+pendiente (sección 7).</div>
 
 <h2>6. Comparación de costos</h2>
 <p class="nota">Precios consultados el 27/11/2026 en MercadoLibre Ecuador (el producto más económico de cada tipo,
@@ -248,6 +264,12 @@ prototipos, práctica y piezas no críticas.</p>
       normal. Requiere montar la parte de 110 V en una caja cerrada revisada por un profesor o un electricista.</li>
   <li><b>Otras mejoras:</b> una caja impresa para la electrónica y la compensación automática del radio del tambor.</li>
 </ul>
+
+<p class="nota" style="overflow-wrap:anywhere; text-align:left"><b>Créditos.</b> Mecánica base (placas laterales, reductor, tambor y
+soportes): «Máquina para hacer Filamento PET» de 3DRODV, Creality Cloud, licencia CC BY 4.0
+(creativecommons.org/licenses/by/4.0), sin modificar.
+Enlace: https://www.crealitycloud.com/model-details/69b4bb67f6b153ff3e33209c. Firmware, documentación, análisis y piezas
+propias: equipo, con asistencia de IA (sección 5).</p>
 
 </body>
 </html>

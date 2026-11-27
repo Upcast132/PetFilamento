@@ -19,8 +19,10 @@ con una relación total de **60:1** en tres etapas (8→32, 12→36 y 11→55).
 > (ATmega328P), pero todavía no se ha probado con la máquina real. Sigue
 > [docs/puesta-en-marcha.md](docs/puesta-en-marcha.md) antes de usarla.
 
-Licencia: MIT (ver [LICENSE](LICENSE)). Cubre el firmware y la documentación
-de este repositorio.
+Licencias: **MIT** para el firmware, la documentación y las piezas propias de
+`cad/fuente/` (ver [LICENSE](LICENSE)). Los archivos de `cad/stl/` y
+`cad/proyecto/` son de 3DRODV y están bajo **CC BY 4.0** (ver
+[Créditos](#créditos)).
 
 ---
 
@@ -31,7 +33,7 @@ PetFilamento/
 ├── README.md
 ├── LICENSE
 ├── firmware/PetFilamento/PetFilamento.ino
-├── cad/                     # modelos 3D propios (STL y archivos fuente)
+├── cad/                     # mecánica base de 3DRODV (STL) y piezas propias (fuente/)
 ├── informe/                 # informe técnico para la feria (HTML y PDF)
 └── docs/
     ├── cableado.md          # conexiones detalladas
@@ -51,7 +53,7 @@ PetFilamento/
 | 1 | Motor NEMA 17 bipolar | 200 pasos por vuelta |
 | 1 | Potenciómetro B50K | Lineal |
 | 1 | Pistola de silicón grande, nueva, de 110 V | Con su propio cable y su PTC, enchufada directo |
-| — | Piezas impresas (diseño propio) | 11 piezas en [`cad/`](cad/): reductor 60:1 de módulo 2, tambor de 74 mm, placas y soportes. Se imprimen en una Ender-3 V3 SE |
+| — | Piezas impresas (diseño de 3DRODV) | 11 piezas en [`cad/`](cad/): reductor 60:1 de módulo 2, tambor de 74 mm, placas y soportes. Se imprimen en una Ender-3 V3 SE. Las piezas propias pendientes están en [Créditos](#créditos) |
 
 Para la mejora opcional del tope de temperatura hacen falta, además, un
 termistor, un relé y una caja para la parte de 110 V. La lista está en
@@ -64,7 +66,7 @@ termistor, un relé y una caja para la parte de 110 V. La lista está en
 | 3 | Varillas roscadas M8, con tuercas y arandelas | Estructura y ejes |
 | 2 | Rodamientos 608 | 8 × 22 × 7 mm. Van en el soporte con tubo (`G46`), cuyo alojamiento mide Ø 22.96: si quedan flojos, pegarlos |
 | 4 | Tornillos M3 de 8 a 10 mm | Fijación del NEMA 17 |
-| 8 | Tornillos M4 | Unen el tambor al engranaje grande. El largo se mide al armar. Los agujeros del tambor miden Ø 2.55: repasarlos a Ø 3.3 con broca antes de atornillar |
+| 8 | Tornillos M3 autorroscantes | Unen el tambor al engranaje grande: pasan por los Ø 4.56 de la rueda y muerden el piloto de Ø 2.55 del tambor. El largo se mide al armar |
 | 1 | Base de madera | Para montar todo |
 | 1 | Cinta Kapton | Aislamiento térmico; con la mejora opcional, fija el termistor a la boquilla |
 | 1 | Broca de 1.6 mm | Para perforar la boquilla |
@@ -325,3 +327,14 @@ Fijas: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C), `BETA_TERMISTOR`
 - **Compensación del radio del tambor:** estimar el radio a partir de las
   vueltas dadas (o medirlo) y ajustar las rpm para mantener constante la
   velocidad lineal del filamento.
+
+## Créditos
+
+- **Mecánica base** (`cad/stl/` y `cad/proyecto/`): "Máquina para hacer
+  Filamento PET" de **3DRODV**, publicada en
+  [Creality Cloud](https://www.crealitycloud.com/model-details/69b4bb67f6b153ff3e33209c)
+  con licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+  Archivos sin modificar. Diseño base elegido con el docente asesor.
+- **Piezas propias, pendientes** (se diseñan en FreeCAD y sus `.FCStd` irán en
+  `cad/fuente/`): piñón corregido con agujero en D para el eje de 5 mm,
+  soporte de la pistola de silicón y caja de la electrónica.

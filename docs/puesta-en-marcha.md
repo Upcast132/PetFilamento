@@ -52,9 +52,10 @@ opcional, además, un termómetro de referencia.
 
 ### Paso 2 — Motor en vacío y relación de reducción
 
-1. Antes de montar el tambor, **repasa con una broca de 3.3 mm los 8 agujeros
-   del tambor** (`G55`, miden Ø 2.55): son de piloto para M3, y un tornillo M4
-   puede rajarlo. Fija los rodamientos 608 en su soporte (`G46`, alojamiento de
+1. Une el tambor a la rueda de 55 dientes con **8 tornillos M3
+   autorroscantes**: pasan por los agujeros de Ø 4.56 de la rueda (`G54`) y
+   muerden en el piloto de Ø 2.55 del tambor (`G55`). No hace falta repasar
+   nada. Fija los rodamientos 608 en su soporte (`G46`, alojamiento de
    Ø 22.96); si quedan flojos, pégalos.
 2. Con el reductor montado pero **sin tira ni pistola**, enciende con 12 V.
    Al arrancar, el Serial debe decir `Modo: solo motor (version base).` Con el
