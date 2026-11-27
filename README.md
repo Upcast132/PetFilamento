@@ -19,8 +19,7 @@ Un Arduino Uno hace dos cosas:
 > [docs/puesta-en-marcha.md](docs/puesta-en-marcha.md) antes de usarla.
 
 Licencia: MIT (ver [LICENSE](LICENSE)). Cubre el firmware y la documentación
-de este repositorio. Las piezas impresas de terceros tienen sus propias
-licencias (ver Créditos).
+de este repositorio.
 
 ---
 
@@ -289,12 +288,3 @@ cambias el hardware: `RELACION_REDUCCION` (60, del reductor de tres etapas),
 - **Compensación del radio del tambor**: estimar el radio a partir de las
   vueltas dadas (o medirlo) y ajustar las rpm para mantener constante la
   velocidad lineal del filamento.
-
-## Créditos
-
-- **PetPull-2**, de Sapienz: [Thingiverse 4900782](https://www.thingiverse.com/thing:4900782).
-  Mecánica base (carrete y reductor).
-- **PETamentor2**, de Tofna1: [Thingiverse 5888962](https://www.thingiverse.com/thing:5888962).
-  Referencia.
-
-> Verificar la licencia de cada uno antes de publicar piezas derivadas.
