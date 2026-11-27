@@ -52,33 +52,38 @@ opcional, además, un termómetro de referencia.
 
 ### Paso 2 — Motor en vacío y relación de reducción
 
-1. Con el reductor montado pero **sin tira ni pistola**, enciende con 12 V.
+1. Antes de montar el tambor, **repasa con una broca de 3.3 mm los 8 agujeros
+   del tambor** (`G55`, miden Ø 2.55): son de piloto para M3, y un tornillo M4
+   puede rajarlo. Fija los rodamientos 608 en su soporte (`G46`, alojamiento de
+   Ø 22.96); si quedan flojos, pégalos.
+2. Con el reductor montado pero **sin tira ni pistola**, enciende con 12 V.
    Al arrancar, el Serial debe decir `Modo: solo motor (version base).` Con el
    potenciómetro al mínimo (zona muerta) debe salir `driver=OFF`, y el eje del
    motor debe quedar libre. Con el reductor 60:1 el tambor cuesta mucho de
    mover a mano: no lo fuerces.
-2. Sube el potenciómetro poco a poco. Debe salir `driver=ON` y el motor debe
+3. Sube el potenciómetro poco a poco. Debe salir `driver=ON` y el motor debe
    acelerar suavemente. Al bajarlo de nuevo a la zona muerta, el motor frena
    con rampa y luego vuelve a `driver=OFF`.
-3. Si gira al revés, cambia `DIRECCION_INVERTIDA`.
-4. Si vibra, zumba sin girar o pierde pasos: revisa el par de cada bobina,
+4. Si gira al revés, cambia `DIRECCION_INVERTIDA`.
+5. Si vibra, zumba sin girar o pierde pasos: revisa el par de cada bobina,
    sube un poco Vref o baja `ACELERACION_PASOS_S2`.
-5. **Revisa que el piñón no patine en el eje de 5 mm del NEMA 17.** Marca con
-   un rotulador una línea que cruce el eje y el piñón, y haz girar el motor con
-   el tambor frenado suavemente con la mano. Si la línea se desfasa, o el eje
-   gira y el piñón no, el piñón patina: **reimprímelo con el agujero de
-   5.2 mm** para que entre ajustado. Si el agujero queda demasiado justo,
-   ajústalo con una broca de 5 mm.
-6. Toca el disipador o el chip del A4988 tras unos minutos de uso. Debe estar
+6. **Revisa que el piñón no patine ni baile en el eje de 5 mm del NEMA 17.**
+   El agujero del piñón (`G51`) es en D, de Ø 5.96 mm con el plano a 5.39 mm:
+   casi 1 mm más grande que el eje (Ø 5 mm, plano a 4.5 mm). Marca con un
+   rotulador una línea que cruce el eje y el piñón, y haz girar el motor con el
+   tambor frenado suavemente con la mano. Si la línea se desfasa, o el piñón
+   tiene juego, **reimprímelo con el agujero en D de Ø 5.2 mm y el plano a
+   4.7 mm**. Si queda demasiado justo, ajústalo con una broca de 5 mm.
+7. Toca el disipador o el chip del A4988 tras unos minutos de uso. Debe estar
    tibio, no quemar.
-7. **Comprueba la relación de reducción.** El firmware ya usa
+8. **Comprueba la relación de reducción.** El firmware ya usa
    `RELACION_REDUCCION = 60` (8→32, 12→36 y 11→55: 4 × 3 × 5 = 60). Cuenta los
    dientes impresos para confirmarlo. Después marca el tambor con un
    rotulador: con el potenciómetro al máximo, el tambor debe dar
    `VELOCIDAD_MAX_RPM_CARRETE` vueltas en un minuto (4 con el valor por
    defecto). Si da otra cantidad, revisa la reducción o el puente MS1/MS2/MS3
    (medio paso: MS1 a 5 V, MS2 y MS3 a GND).
-8. Con 60:1 y medio paso, el límite de 2000 pasos/s equivale a 5 rpm de
+9. Con 60:1 y medio paso, el límite de 2000 pasos/s equivale a 5 rpm de
    tambor. Si pones `VELOCIDAD_MAX_RPM_CARRETE` por encima de 5, el firmware
    recorta la velocidad.
 

@@ -51,7 +51,7 @@ PetFilamento/
 | 1 | Motor NEMA 17 bipolar | 200 pasos por vuelta |
 | 1 | Potenciómetro B50K | Lineal |
 | 1 | Pistola de silicón grande, nueva, de 110 V | Con su propio cable y su PTC, enchufada directo |
-| — | Piezas impresas (diseño propio) | Reductor 60:1 de módulo 2, tambor de 74 mm, soporte de la pistola y soportes |
+| — | Piezas impresas (diseño propio) | 11 piezas en [`cad/`](cad/): reductor 60:1 de módulo 2, tambor de 74 mm, placas y soportes. Se imprimen en una Ender-3 V3 SE |
 
 Para la mejora opcional del tope de temperatura hacen falta, además, un
 termistor, un relé y una caja para la parte de 110 V. La lista está en
@@ -62,9 +62,9 @@ termistor, un relé y una caja para la parte de 110 V. La lista está en
 | Cant. | Pieza | Notas |
 |---|---|---|
 | 3 | Varillas roscadas M8, con tuercas y arandelas | Estructura y ejes |
-| 2 | Rodamientos 608 | 8 mm de diámetro interior, para las varillas M8 |
+| 2 | Rodamientos 608 | 8 × 22 × 7 mm. Van en el soporte con tubo (`G46`), cuyo alojamiento mide Ø 22.96: si quedan flojos, pegarlos |
 | 4 | Tornillos M3 de 8 a 10 mm | Fijación del NEMA 17 |
-| 8 | Tornillos M4 | Unen el tambor al engranaje grande. El largo se mide al armar |
+| 8 | Tornillos M4 | Unen el tambor al engranaje grande. El largo se mide al armar. Los agujeros del tambor miden Ø 2.55: repasarlos a Ø 3.3 con broca antes de atornillar |
 | 1 | Base de madera | Para montar todo |
 | 1 | Cinta Kapton | Aislamiento térmico; con la mejora opcional, fija el termistor a la boquilla |
 | 1 | Broca de 1.6 mm | Para perforar la boquilla |
