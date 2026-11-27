@@ -2,9 +2,14 @@
 
 Pines fijos. Si cambias alguno, también hay que cambiar el firmware.
 
+- **Versión base:** secciones 1 a 4 (alimentación, driver y motor,
+  potenciómetro y pistola). Es lo que usa el firmware por defecto.
+- **Mejora opcional:** sección 5 (termistor y relé del tope de temperatura).
+  Solo si se activa `USAR_TOPE_TEMPERATURA` en el firmware.
+
 **Regla general:** todas las tierras (GND del adaptador de 12 V, del Uno, del
-A4988, del potenciómetro, del termistor y del relé) van unidas en un solo punto
-común.
+A4988, del potenciómetro y, con la mejora, del termistor y del relé) van unidas
+en un solo punto común.
 
 ## 1. Alimentación
 
@@ -14,15 +19,16 @@ común.
 | Adaptador +12 V | A4988 VMOT | Potencia del motor |
 | Adaptador GND | Uno GND y A4988 GND (de motor) | GND común |
 | Condensador de 100 µF | Entre VMOT (+) y GND (−) | **Lo más cerca posible del A4988.** Respeta la polaridad. Protege el driver de picos de tensión |
-| Uno 5V | A4988 VDD, potenciómetro, divisor del termistor, relé VCC | Lógica |
+| Uno 5V | A4988 VDD y potenciómetro (con la mejora: divisor del termistor y relé VCC) | Lógica |
 
 > **VMOT se toma directo del adaptador**, con un cable en Y o una bornera. No
 > lo saques del pin VIN del Uno: con el jack, VIN pasa por el diodo de
 > protección de la placa, que no está pensado para la corriente del motor.
 
 > Con 12 V de entrada, el regulador del Uno se calienta si se le pide mucha
-> corriente por el pin 5V. La bobina del relé consume unos 70–80 mA, y eso entra
-> dentro de lo razonable junto con la lógica. No le cuelgues más cargas.
+> corriente por el pin 5V. En la versión base solo alimenta la lógica. Con la
+> mejora, la bobina del relé suma unos 70–80 mA, y eso entra dentro de lo
+> razonable. No le cuelgues más cargas.
 
 > **Programación por USB:** el Uno original conmuta solo entre USB y fuente
 > externa. En un clon, apaga la máquina antes de conectar el USB.
@@ -73,7 +79,19 @@ GND ──── extremo 2
 Si el giro del potenciómetro va "al revés" de lo que esperas, intercambia los
 extremos.
 
-## 4. Termistor NTC 100k (B 3950)
+## 4. Pistola de silicón (versión base)
+
+La pistola se enchufa **directo a la pared con su propio cable**. No se corta
+ni se modifica nada de 110 V. Se calienta sola con su PTC, como cualquier
+pistola de silicón, y va fija en su soporte impreso.
+
+## 5. Mejora opcional: tope de temperatura
+
+Solo con `#define USAR_TOPE_TEMPERATURA` activado en el firmware. Si activas
+la opción sin conectar el termistor, el firmware entra en FALLA y no deja
+arrancar el motor.
+
+### 5.1 Termistor NTC 100k (B 3950)
 
 ```
 5 V ──[ 4.7 kΩ ]──┬──────────► A1
@@ -97,9 +115,7 @@ Con estos valores, a temperatura ambiente el ADC lee cerca de 975–990, y a
 unos 230 °C lee alrededor de 90. Por encima de 1015 el firmware lo toma como
 termistor desconectado. Por debajo de 5, como cortocircuito.
 
-## 5. Módulo de relé de 5 V (un canal)
-
-### Lado de baja tensión
+### 5.2 Módulo de relé de 5 V (un canal): lado de baja tensión
 
 | Pin del módulo | Conectar a |
 |---|---|
@@ -108,10 +124,10 @@ termistor desconectado. Por debajo de 5, como cortocircuito.
 | IN | Uno D5 |
 
 Si el módulo tiene un puente para elegir disparo en alto o en bajo (H/L),
-anota en qué posición está y comprueba el nivel en el paso 1 de
+anota en qué posición está y comprueba el nivel en el paso O1 de
 [puesta-en-marcha.md](puesta-en-marcha.md).
 
-### Lado de 110 V
+### 5.3 Módulo de relé: lado de 110 V
 
 > ⚠️ **Esta parte la monta o la revisa un profesor o un electricista.** Todo
 > va dentro de una caja cerrada, con prensaestopas o alivio de tensión en los
@@ -138,7 +154,9 @@ TIERRA (si hay) ─────────────────────�
   polarizado y no se puede asegurar cuál es la fase, coméntalo con quien
   revise la instalación.
 
-## Diagrama general
+## Diagrama completo (con la mejora opcional)
+
+El diagrama de la versión base, sin termistor ni relé, está en el README.
 
 ```
                  +12 V (adaptador) ─────────┬──────────────────────┐

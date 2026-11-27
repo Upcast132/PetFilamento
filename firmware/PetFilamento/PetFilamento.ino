@@ -5,15 +5,16 @@
  * de 1.75 mm. Mecánica: NEMA 17 con reductor de engranajes de módulo 2
  * (60:1, tres etapas) que mueve un tambor de 74 mm de diámetro.
  *
- * El Arduino Uno hace SOLO dos cosas:
- *   1. Controla la velocidad del motor NEMA 17 (A4988) según un potenciómetro.
- *   2. Actúa como TOPE de seguridad de temperatura: si la boquilla se pasa de
- *      TEMP_TOPE_C, activa el relé y corta la pistola de silicón.
+ * VERSIÓN BASE (por defecto): el Arduino Uno solo controla la velocidad del
+ * motor NEMA 17 (A4988) según un potenciómetro. La pistola de silicón se
+ * enchufa directo y se calienta sola con su PTC, como cualquier pistola.
  *
- * El calentamiento normal lo hace la propia pistola con su PTC. Este firmware
- * NUNCA enciende la pistola ni regula su temperatura (no hay PID). El relé va
- * por el contacto NC: relé desactivado = pistola normal; relé activado =
- * pistola cortada.
+ * MEJORA OPCIONAL (USAR_TOPE_TEMPERATURA): con un termistor en A1 y un relé
+ * en D5, el Uno además actúa como TOPE de seguridad de temperatura: si la
+ * boquilla se pasa de TEMP_TOPE_C, activa el relé y corta la pistola.
+ * Incluso con la mejora, este firmware NUNCA enciende la pistola ni regula su
+ * temperatura (no hay PID). El relé va por el contacto NC: relé desactivado =
+ * pistola normal; relé activado = pistola cortada.
  *
  * Estado: SIN PROBAR EN HARDWARE.
  *
@@ -29,8 +30,15 @@
 // OPCIONES DE COMPILACIÓN
 // ===========================================================================
 
+// Mejora opcional: tope de seguridad de temperatura (termistor en A1 + relé
+// en D5). Desactivada por defecto: la versión base solo controla el motor.
+// Actívala SOLO si el termistor y el relé están conectados; si no, A1 queda
+// al aire, el firmware lo toma como sensor dañado, entra en FALLA y para el
+// motor. Ver "Mejora opcional" en docs/cableado.md y docs/puesta-en-marcha.md.
+// #define USAR_TOPE_TEMPERATURA
+
 // Línea de estado por Serial cada 500 ms. Comentar para desactivarla.
-// (Los mensajes de FALLA se envían siempre, con o sin esta opción.)
+// (Con el tope activado, los mensajes de FALLA se envían siempre.)
 #define DEBUG_SERIAL
 
 // Watchdog de 2 s. Desactivado por defecto. El Uno con Optiboot lo soporta,
@@ -85,6 +93,9 @@ const int ZONA_MUERTA_ADC = 15;
 // Filtro EMA del potenciómetro (0 < alfa <= 1; más bajo = más suave).
 const float ALFA_EMA_POT = 0.1;
 
+#ifdef USAR_TOPE_TEMPERATURA
+// Las constantes de termistor, tope y relé solo existen con la mejora activa.
+
 // --- Termistor --------------------------------------------------------------
 
 // CALIBRAR: valor real de la resistencia de 4.7k del divisor (medirla con el
@@ -136,13 +147,15 @@ const uint8_t EVALUACIONES_FALLA_SENSOR = 3;
 const uint8_t RELE_NIVEL_ACTIVO = LOW;
 const uint8_t RELE_NIVEL_INACTIVO = (RELE_NIVEL_ACTIVO == LOW) ? HIGH : LOW;
 
+const unsigned long PERIODO_TEMPERATURA_MS = 250;   // evaluación del tope
+const unsigned long PERIODO_MENSAJE_FALLA_MS = 2000;
+#endif  // USAR_TOPE_TEMPERATURA
+
 // --- Tiempos del lazo -------------------------------------------------------
 
-const unsigned long PERIODO_LECTURA_ADC_MS = 25;    // pot y termistor
+const unsigned long PERIODO_LECTURA_ADC_MS = 25;    // pot (y termistor)
 const unsigned long PERIODO_RAMPA_MS = 10;          // rampa de velocidad
-const unsigned long PERIODO_TEMPERATURA_MS = 250;   // evaluación del tope
 const unsigned long PERIODO_SERIAL_MS = 500;        // línea de estado
-const unsigned long PERIODO_MENSAJE_FALLA_MS = 2000;
 
 // ===========================================================================
 // PINES (fijos por hardware, no cambiar)
@@ -151,9 +164,11 @@ const unsigned long PERIODO_MENSAJE_FALLA_MS = 2000;
 const uint8_t PIN_STEP = 2;    // A4988 STEP
 const uint8_t PIN_DIR = 3;     // A4988 DIR (lo maneja AccelStepper)
 const uint8_t PIN_ENABLE = 4;  // A4988 ENABLE, activo en bajo, pull-up 10k
-const uint8_t PIN_RELE = 5;    // señal del módulo de relé
 const uint8_t PIN_POT = A0;    // cursor del potenciómetro B50K
-const uint8_t PIN_NTC = A1;    // divisor del termistor
+#ifdef USAR_TOPE_TEMPERATURA
+const uint8_t PIN_RELE = 5;    // señal del módulo de relé (mejora opcional)
+const uint8_t PIN_NTC = A1;    // divisor del termistor (mejora opcional)
+#endif
 
 // ===========================================================================
 // ESTADO
@@ -163,7 +178,6 @@ AccelStepper motor(AccelStepper::DRIVER, PIN_STEP, PIN_DIR);
 
 // Lecturas filtradas
 float adcPotFiltrado = 0.0;
-float adcNtcFiltrado = 0.0;
 uint8_t ultimoCanalAdc = 0xFF;  // para descartar la 1.ª lectura al cambiar
 
 // Motor
@@ -172,23 +186,26 @@ float velocidadObjetivoPasosS = 0.0;
 float velocidadActualPasosS = 0.0;
 bool driverHabilitado = false;
 
+// Falla enclavada. Sin la mejora opcional nunca pasa a true.
+bool enFalla = false;
+
+#ifdef USAR_TOPE_TEMPERATURA
 // Temperatura y relé
+float adcNtcFiltrado = 0.0;
 float temperaturaC = NAN;
 bool lecturaTermistorValida = false;
 bool releActivo = false;           // true = pistola cortada
 unsigned long instanteCorteMs = 0;
 uint8_t contadorLecturasInvalidas = 0;
-
-// Falla enclavada
-bool enFalla = false;
 const char *motivoFalla = "";
+unsigned long ultimaTemperaturaMs = 0;
+unsigned long ultimoMensajeFallaMs = 0;
+#endif
 
 // Temporizadores
 unsigned long ultimoAdcMs = 0;
 unsigned long ultimaRampaMs = 0;
-unsigned long ultimaTemperaturaMs = 0;
 unsigned long ultimoSerialMs = 0;
-unsigned long ultimoMensajeFallaMs = 0;
 
 // ===========================================================================
 // ADC
@@ -207,7 +224,9 @@ int leerAdc(uint8_t pin) {
 
 void actualizarLecturas() {
   adcPotFiltrado += ALFA_EMA_POT * ((float)leerAdc(PIN_POT) - adcPotFiltrado);
+#ifdef USAR_TOPE_TEMPERATURA
   adcNtcFiltrado += ALFA_EMA_TERMISTOR * ((float)leerAdc(PIN_NTC) - adcNtcFiltrado);
+#endif
 }
 
 // ===========================================================================
@@ -284,8 +303,10 @@ void actualizarEnable() {
 }
 
 // ===========================================================================
-// TEMPERATURA Y RELÉ
+// TEMPERATURA Y RELÉ (mejora opcional)
 // ===========================================================================
+
+#ifdef USAR_TOPE_TEMPERATURA
 
 // Ecuación Beta:
 //   R_termistor = R_PULLUP x ADC / (1023 - ADC)
@@ -357,6 +378,15 @@ void evaluarTemperatura() {
   }
 }
 
+void imprimirFalla() {
+  Serial.print(F("!!! FALLA: "));
+  Serial.print(motivoFalla);
+  Serial.print(F(" (ADC termistor="));
+  Serial.print((int)adcNtcFiltrado);
+  Serial.println(F("). Pistola cortada, motor detenido. Reinicia el Uno."));
+}
+#endif  // USAR_TOPE_TEMPERATURA
+
 // ===========================================================================
 // SERIAL
 // ===========================================================================
@@ -369,6 +399,7 @@ void imprimirEstado() {
   Serial.print(rpmCarreteObjetivo * PI * DIAMETRO_TAMBOR_MM / 1000.0, 2);
   Serial.print(F("m/min pot="));
   Serial.print((int)adcPotFiltrado);
+#ifdef USAR_TOPE_TEMPERATURA
   Serial.print(F(" T="));
   if (lecturaTermistorValida) {
     Serial.print(temperaturaC, 1);
@@ -378,20 +409,17 @@ void imprimirEstado() {
   }
   Serial.print(F(" rele="));
   Serial.print(releActivo ? F("CORTA") : F("normal"));
+#endif
   Serial.print(F(" driver="));
+#ifdef USAR_TOPE_TEMPERATURA
   Serial.print(driverHabilitado ? F("ON") : F("OFF"));
   Serial.print(F(" falla="));
   Serial.println(enFalla ? F("SI") : F("NO"));
+#else
+  Serial.println(driverHabilitado ? F("ON") : F("OFF"));
+#endif
 }
 #endif
-
-void imprimirFalla() {
-  Serial.print(F("!!! FALLA: "));
-  Serial.print(motivoFalla);
-  Serial.print(F(" (ADC termistor="));
-  Serial.print((int)adcNtcFiltrado);
-  Serial.println(F("). Pistola cortada, motor detenido. Reinicia el Uno."));
-}
 
 // ===========================================================================
 // SETUP Y LOOP
@@ -403,11 +431,13 @@ void setup() {
   wdt_disable();
 #endif
 
+#ifdef USAR_TOPE_TEMPERATURA
   // Relé: primero el nivel inactivo y después la salida, para que nunca haya
   // un pulso de activación al arrancar.
   digitalWrite(PIN_RELE, RELE_NIVEL_INACTIVO);
   pinMode(PIN_RELE, OUTPUT);
   releActivo = false;
+#endif
 
   // ENABLE: primero HIGH (deshabilitado) y después la salida. El pull-up de
   // 10k ya lo mantiene deshabilitado mientras el pin es entrada.
@@ -422,17 +452,26 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println(F("PetFilamento iniciado (firmware sin probar en hardware)."));
+#ifdef USAR_TOPE_TEMPERATURA
+  Serial.println(F("Modo: motor + tope de temperatura (mejora opcional)."));
+#else
+  Serial.println(F("Modo: solo motor (version base)."));
+#endif
 
   // Siembra los filtros con una lectura real para no arrancar desde 0
   // (un termistor en 0 parecería un cortocircuito).
   adcPotFiltrado = leerAdc(PIN_POT);
+#ifdef USAR_TOPE_TEMPERATURA
   adcNtcFiltrado = leerAdc(PIN_NTC);
+#endif
 
   unsigned long ahora = millis();
   ultimoAdcMs = ahora;
   ultimaRampaMs = ahora;
-  ultimaTemperaturaMs = ahora;
   ultimoSerialMs = ahora;
+#ifdef USAR_TOPE_TEMPERATURA
+  ultimaTemperaturaMs = ahora;
+#endif
 
 #ifdef USAR_WATCHDOG
   wdt_enable(WDTO_2S);
@@ -450,10 +489,12 @@ void loop() {
     actualizarLecturas();
   }
 
+#ifdef USAR_TOPE_TEMPERATURA
   if (ahora - ultimaTemperaturaMs >= PERIODO_TEMPERATURA_MS) {
     ultimaTemperaturaMs = ahora;
     evaluarTemperatura();
   }
+#endif
 
   if (ahora - ultimaRampaMs >= PERIODO_RAMPA_MS) {
     unsigned long dt = ahora - ultimaRampaMs;
@@ -464,10 +505,12 @@ void loop() {
     actualizarEnable();   // deshabilita en cuanto la rampa llega a cero
   }
 
+#ifdef USAR_TOPE_TEMPERATURA
   if (enFalla && ahora - ultimoMensajeFallaMs >= PERIODO_MENSAJE_FALLA_MS) {
     ultimoMensajeFallaMs = ahora;
     imprimirFalla();
   }
+#endif
 
 #ifdef DEBUG_SERIAL
   if (ahora - ultimoSerialMs >= PERIODO_SERIAL_MS) {

@@ -1,71 +1,30 @@
 # Puesta en marcha
 
-Sigue los pasos en orden. **Del paso 1 al 4 se trabaja SIN 110 V**: la pistola
-queda desenchufada todo ese tiempo. Para los pasos 1 y 2 basta con alimentar
-el Uno por USB. El adaptador de 12 V hace falta desde el paso 3.
+Hay dos partes:
+
+- **Versión base (pasos 1 a 3):** solo el motor. La pistola se enchufa directo
+  a la pared con su propio cable, sin modificar nada de 110 V.
+- **Mejora opcional (pasos O1 a O3):** el tope de temperatura con termistor y
+  relé. Solo hace falta si se monta esa mejora.
+
+Anota cada valor medido y cópialo en las constantes del inicio de
+`firmware/PetFilamento/PetFilamento.ino`. **Antes de la homologación de la
+feria**, el firmware tiene que quedar calibrado y grabado: después no se
+permiten cambios en el prototipo.
 
 > **USB con el adaptador enchufado:** el Uno original conmuta solo entre USB
 > y fuente externa, así que puedes ver el Serial con los 12 V conectados. En
 > un clon, apaga la máquina antes de conectar el USB.
 
-Anota cada valor medido y cópialo en las constantes del inicio de
-`firmware/PetFilamento/PetFilamento.ino`.
-
-Material: multímetro, termómetro de referencia (de cocina o un multímetro con
-termopar), destornillador pequeño de cerámica o plástico y pinzas.
+Material: multímetro, destornillador pequeño de cerámica o plástico, pinzas,
+calibrador (pie de rey), balanza de cocina y cronómetro. Para la mejora
+opcional, además, un termómetro de referencia.
 
 ---
 
-## Paso 1 — ¿El relé es activo en alto o en bajo?
+## Versión base
 
-Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
-
-1. Alimenta el módulo: VCC a 5 V y GND a GND (del Uno conectado por USB).
-2. Pon el multímetro en **continuidad** entre los bornes **COM** y **NC**.
-   Con el relé en reposo debe pitar (NC cerrado).
-3. Con un cable, conecta **IN a GND**.
-   - Si el relé hace "clic", se enciende su LED y COM–NC **deja de pitar**:
-     el módulo es **activo en bajo** → `RELE_NIVEL_ACTIVO = LOW`.
-4. Si no pasó nada, conecta **IN a 5 V**.
-   - Si ahora hace "clic" y COM–NC deja de pitar: es **activo en alto** →
-     `RELE_NIVEL_ACTIVO = HIGH`.
-5. Comprueba también qué pasa con **IN al aire** (desconectado). Así está el
-   pin mientras el Uno arranca. Lo normal en un módulo activo en bajo es que
-   el relé quede en reposo, y con eso la pistola funciona normal.
-6. Graba el firmware y verifica por Serial: al arrancar debe decir
-   `rele=normal` y COM–NC debe seguir pitando. Si dice `normal` pero COM–NC
-   está abierto, el nivel está al revés: corrige la constante.
-
-> Si el módulo tiene un puente H/L, déjalo fijo y anota en qué posición quedó.
-
-## Paso 2 — Comprobar el termistor
-
-1. Conecta el divisor (4.7k + NTC + 100 nF) a A1 como indica
-   [cableado.md](cableado.md).
-2. Antes de soldarla, mide la resistencia de 4.7k con el multímetro y pon el
-   valor real en `R_PULLUP`.
-3. Abre el Monitor Serie a 115200. A temperatura ambiente, `T=` debe marcar
-   algo cercano a la del cuarto.
-   - Si aparece `T=--` y luego `FALLA: termistor abierto`, el termistor está
-     desconectado o mal soldado.
-   - Si aparece `FALLA: termistor en cortocircuito`, revisa que las patas no se
-     toquen entre sí ni toquen la boquilla.
-   - Para salir de una falla hay que reiniciar el Uno.
-4. Compara con el termómetro de referencia en al menos dos puntos:
-   - Temperatura ambiente.
-   - Agua caliente o hirviendo, con el termistor y el termómetro juntos (mete
-     el termistor en una funda o bolsita para que no se moje). Ojo: el agua
-     hierve a menos de 100 °C en altura (por ejemplo, unos 90 °C a 2800 m), así
-     que fíate del termómetro y no del "100 °C".
-5. Si la diferencia es parecida en los dos puntos, ajusta `TEMP_OFFSET_C`
-   (positivo si el Arduino marca menos que el termómetro). Si la diferencia
-   crece mucho con la temperatura, revisa `R_PULLUP` y `BETA_TERMISTOR` antes
-   de tocar el offset.
-
-> La lectura pierde exactitud cerca de 200 °C (ver Limitaciones en el README).
-> Para el tope, deja margen.
-
-## Paso 3 — Ajustar el Vref del A4988 (motor DESCONECTADO)
+### Paso 1 — Ajustar el Vref del A4988 (motor DESCONECTADO)
 
 > **No conectes ni desconectes el motor con el driver alimentado.**
 
@@ -91,12 +50,13 @@ Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
    más.
 7. Apaga todo y entonces conecta el motor.
 
-## Paso 4 — Motor en vacío y relación de reducción
+### Paso 2 — Motor en vacío y relación de reducción
 
 1. Con el reductor montado pero **sin tira ni pistola**, enciende con 12 V.
-   Con el potenciómetro al mínimo (zona muerta), por Serial debe salir
-   `driver=OFF`, y el eje del motor debe quedar libre. Con el reductor 60:1
-   el tambor cuesta mucho de mover a mano: no lo fuerces.
+   Al arrancar, el Serial debe decir `Modo: solo motor (version base).` Con el
+   potenciómetro al mínimo (zona muerta) debe salir `driver=OFF`, y el eje del
+   motor debe quedar libre. Con el reductor 60:1 el tambor cuesta mucho de
+   mover a mano: no lo fuerces.
 2. Sube el potenciómetro poco a poco. Debe salir `driver=ON` y el motor debe
    acelerar suavemente. Al bajarlo de nuevo a la zona muerta, el motor frena
    con rampa y luego vuelve a `driver=OFF`.
@@ -122,7 +82,116 @@ Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
    tambor. Si pones `VELOCIDAD_MAX_RPM_CARRETE` por encima de 5, el firmware
    recorta la velocidad.
 
-## Paso 5 — Conectar los 110 V (solo después de la revisión)
+### Paso 3 — Prueba de la tira
+
+Valida lo más incierto: si la pistola calienta lo suficiente para formar el
+filamento.
+
+1. **Con la pistola desenchufada y fría**, saca los restos de pegamento de la
+   boquilla y del canal.
+2. Comprueba que la boquilla esté perforada a **1.6 mm**. Si no lo está,
+   perfórala con la broca de 1.6 mm, también con la pistola fría y
+   desenchufada, y limpia la viruta. Después monta la pistola en su soporte
+   impreso y revisa que quede firme.
+3. Prepara una tira de botella de ancho parejo y córtale la punta en forma de
+   **pico** para que entre por el agujero.
+4. Enchufa la pistola directo a la pared, espera a que caliente y mete la
+   punta por la boquilla.
+5. Con **pinzas**, jala la punta lentamente con la mano (sin motor) y mira el
+   resultado:
+   - **Sale redondo, liso y del grosor esperado** → la temperatura sirve.
+     Pasa la punta al tambor y prueba con el motor, empezando por la velocidad
+     más baja.
+   - **Sale plano, o la tira no pasa y se rompe** → falta temperatura. La
+     pistola puede no ser suficiente (ver Limitaciones en el README).
+   - **Sale oscuro, con burbujas o echa humo** → hay demasiada temperatura.
+     Desenchufa y revisa.
+6. Con el motor en marcha, busca la velocidad a la que el filamento sale
+   uniforme y anótala para `VELOCIDAD_MIN_RPM_CARRETE` y
+   `VELOCIDAD_MAX_RPM_CARRETE`. La línea de Serial muestra la velocidad
+   lineal en m/min (con el tambor vacío).
+7. Recuerda: al llenarse el tambor la velocidad lineal sube. Ve bajando el
+   potenciómetro.
+8. Cada botella da un tramo corto. Para formar un rollo hay que empalmar los
+   tramos de varias botellas.
+
+**Datos para el informe técnico.** Anótalos durante esta prueba; son la
+evidencia de la sección de resultados:
+
+| Dato | Cómo medirlo |
+|---|---|
+| Diámetro del filamento | Calibrador en 10 puntos de un tramo: promedio, mínimo y máximo |
+| Ancho y grosor de la tira | Calibrador, antes de pasarla por la boquilla |
+| Metros de filamento por botella | Medir el tramo que sale de una botella (anotar si es de 500 ml, 1.5 L o 2 L) |
+| Gramos de filamento por botella | Pesar el tramo en la balanza |
+| Velocidad óptima | rpm y m/min del Serial con los que sale mejor |
+| Tiempo por botella | Cronómetro, desde que entra la punta hasta que se acaba la tira |
+
+Ventila el lugar y no dejes la máquina sin supervisión en ningún momento.
+
+---
+
+## Mejora opcional: tope de temperatura
+
+Solo si se monta el termistor y el relé. Antes de grabar el firmware,
+descomenta `#define USAR_TOPE_TEMPERATURA` en el `.ino`. Al arrancar, el
+Serial debe decir `Modo: motor + tope de temperatura (mejora opcional).`
+
+> Si activas la opción sin el termistor conectado, el firmware entra en FALLA
+> y no deja arrancar el motor. Es el comportamiento esperado.
+
+Los pasos O1 y O2 se hacen **sin 110 V**: basta con alimentar el Uno por USB.
+
+### Paso O1 — ¿El relé es activo en alto o en bajo?
+
+Se hace con el módulo suelto, sin la pistola conectada a sus bornes.
+
+1. Alimenta el módulo: VCC a 5 V y GND a GND (del Uno conectado por USB).
+2. Pon el multímetro en **continuidad** entre los bornes **COM** y **NC**.
+   Con el relé en reposo debe pitar (NC cerrado).
+3. Con un cable, conecta **IN a GND**.
+   - Si el relé hace "clic", se enciende su LED y COM–NC **deja de pitar**:
+     el módulo es **activo en bajo** → `RELE_NIVEL_ACTIVO = LOW`.
+4. Si no pasó nada, conecta **IN a 5 V**.
+   - Si ahora hace "clic" y COM–NC deja de pitar: es **activo en alto** →
+     `RELE_NIVEL_ACTIVO = HIGH`.
+5. Comprueba también qué pasa con **IN al aire** (desconectado). Así está el
+   pin mientras el Uno arranca. Lo normal en un módulo activo en bajo es que
+   el relé quede en reposo, y con eso la pistola funciona normal.
+6. Graba el firmware y verifica por Serial: al arrancar debe decir
+   `rele=normal` y COM–NC debe seguir pitando. Si dice `normal` pero COM–NC
+   está abierto, el nivel está al revés: corrige la constante.
+
+> Si el módulo tiene un puente H/L, déjalo fijo y anota en qué posición quedó.
+
+### Paso O2 — Comprobar el termistor
+
+1. Conecta el divisor (4.7k + NTC + 100 nF) a A1 como indica
+   [cableado.md](cableado.md#5-mejora-opcional-tope-de-temperatura).
+2. Antes de soldarla, mide la resistencia de 4.7k con el multímetro y pon el
+   valor real en `R_PULLUP`.
+3. Abre el Monitor Serie a 115200. A temperatura ambiente, `T=` debe marcar
+   algo cercano a la del cuarto.
+   - Si aparece `T=--` y luego `FALLA: termistor abierto`, el termistor está
+     desconectado o mal soldado.
+   - Si aparece `FALLA: termistor en cortocircuito`, revisa que las patas no se
+     toquen entre sí ni toquen la boquilla.
+   - Para salir de una falla hay que reiniciar el Uno.
+4. Compara con el termómetro de referencia en al menos dos puntos:
+   - Temperatura ambiente.
+   - Agua caliente o hirviendo, con el termistor y el termómetro juntos (mete
+     el termistor en una funda o bolsita para que no se moje). Ojo: el agua
+     hierve a menos de 100 °C en altura (por ejemplo, unos 90 °C a 2800 m), así
+     que fíate del termómetro y no del "100 °C".
+5. Si la diferencia es parecida en los dos puntos, ajusta `TEMP_OFFSET_C`
+   (positivo si el Arduino marca menos que el termómetro). Si la diferencia
+   crece mucho con la temperatura, revisa `R_PULLUP` y `BETA_TERMISTOR` antes
+   de tocar el offset.
+
+> La lectura pierde exactitud cerca de 200 °C (ver la mejora opcional en el
+> README). Para el tope, deja margen.
+
+### Paso O3 — Conectar los 110 V por el relé (solo después de la revisión)
 
 > ⚠️ **No sigas sin que un profesor o un electricista haya revisado el
 > cableado de 110 V y la caja cerrada.**
@@ -133,7 +202,7 @@ Lista para la revisión:
 - [ ] Ningún borne ni empalme de 110 V queda expuesto; la caja está cerrada.
 - [ ] Los cables tienen alivio de tensión: un tirón no los arranca.
 - [ ] La pistola conserva su PTC y su termostato originales.
-- [ ] El paso 1 confirmó `RELE_NIVEL_ACTIVO`.
+- [ ] El paso O1 confirmó `RELE_NIVEL_ACTIVO`.
 
 Prueba del tope (con supervisión):
 
@@ -150,38 +219,3 @@ Prueba del tope (con supervisión):
 6. Deja la pistola calentar sola unos 10 minutos y anota la temperatura máxima
    que alcanza. `TEMP_TOPE_C` debe quedar algo por encima de ese valor: si
    queda por debajo, el relé cortará en cada ciclo de trabajo normal.
-
-## Paso 6 — Prueba de la tira
-
-Valida lo más incierto: si la pistola calienta lo suficiente para formar el
-filamento.
-
-1. **Con la pistola desenchufada y fría**, saca los restos de pegamento de la
-   boquilla y del canal.
-2. Comprueba que la boquilla esté perforada a **1.6 mm**. Si no lo está,
-   perfórala con la broca de 1.6 mm, también con la pistola fría y
-   desenchufada, y limpia la viruta. Después monta la pistola en su soporte
-   impreso y revisa que quede firme.
-3. Prepara una tira de botella de ancho parejo y córtale la punta en forma de
-   **pico** para que entre por el agujero.
-4. Enchufa la pistola, espera a que caliente y mete la punta por la boquilla.
-5. Con **pinzas**, jala la punta lentamente con la mano (sin motor) y mira el
-   resultado:
-   - **Sale redondo, liso y del grosor esperado** → la temperatura sirve.
-     Pasa la punta al tambor y prueba con el motor, empezando por la velocidad
-     más baja.
-   - **Sale plano, o la tira no pasa y se rompe** → falta temperatura. La
-     pistola puede no ser suficiente (ver Limitaciones en el README).
-   - **Sale oscuro, con burbujas o echa humo** → hay demasiada temperatura.
-     Desenchufa y revisa.
-6. Con el motor en marcha, busca la velocidad a la que el filamento sale
-   uniforme y anótala para `VELOCIDAD_MIN_RPM_CARRETE` y
-   `VELOCIDAD_MAX_RPM_CARRETE`. La línea de Serial muestra la velocidad
-   lineal en m/min (con el tambor vacío). Mide el diámetro con un calibrador
-   en varios puntos.
-7. Recuerda: al llenarse el tambor la velocidad lineal sube. Ve bajando el
-   potenciómetro.
-8. Cada botella da un tramo corto. Para formar un rollo hay que empalmar los
-   tramos de varias botellas.
-
-Ventila el lugar y no dejes la máquina sin supervisión en ningún momento.
