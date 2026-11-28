@@ -81,7 +81,7 @@ robótica o un colegio con impresora 3D consume varios rollos al año en prototi
     <rect x="295" y="100" width="210" height="40" rx="5" fill="#fff7e6" stroke="#b5761b"/>
   </g>
   <g font-size="12" text-anchor="middle" fill="#1a1a1a">
-    <text x="57" y="27">Adaptador</text><text x="57" y="42">12 V</text>
+    <text x="57" y="27">Cargador 19 V +</text><text x="57" y="42">buck a 12 V</text>
     <text x="57" y="87">Potenciómetro</text><text x="57" y="102">(velocidad)</text>
     <text x="202" y="57">Arduino Uno</text><text x="202" y="72">firmware propio</text>
     <text x="337" y="57">Driver</text><text x="337" y="72">A4988 (½ paso)</text>
@@ -104,7 +104,8 @@ robótica o un colegio con impresora 3D consume varios rollos al año en prototi
   <li><b>Mecánica:</b> el NEMA 17 mueve el tambor de 74 mm a través de un reductor de tres etapas impreso. La estructura
       usa varillas roscadas M8, dos rodamientos 608 y una base de madera.</li>
   <li><b>Electrónica:</b> un Arduino Uno y un driver A4988 en medio paso (400 pasos por vuelta del motor), alimentados
-      con 12 V.</li>
+      con 12 V que salen de un módulo buck LM2596 conectado a un cargador de laptop de unos 19 V. Todo va en una caja
+      impresa de dos secciones (sección 4.4).</li>
   <li><b>Firmware:</b> lee el potenciómetro con un filtro de promedio exponencial y una zona muerta para parar el motor.
       La velocidad cambia con una rampa de aceleración, así el motor no pierde pasos. El driver se apaga cuando el motor
       está parado, y el programa no usa <code>delay()</code>. Por el puerto serie muestra la velocidad del tambor en rpm
@@ -159,13 +160,13 @@ tiempo de impresión: <span class="pend">[horas en la Ender-3 V3 SE]</span>.</p>
 La fuerza sobra: con un motor de unos 0.4 N·m y la reducción de 60:1, el tambor podría tirar con varios cientos de
 newtons, así que el límite real es la resistencia de los dientes impresos, no el motor.</p>
 <h3>4.4 Piezas propias</h3>
-<p style="break-after:avoid">Piezas que el equipo diseña en <span class="pend">[FreeCAD]</span> para corregir o completar la mecánica base. Los
-archivos <code>.FCStd</code> se entregan en <code>cad/fuente/</code>.</p>
+<p style="break-after:avoid">Piezas que el equipo diseña en Blender para corregir o completar la mecánica base. Los archivos editables
+(<code>.blend</code> y el script que genera el modelo) y los STL se entregan en <code>cad/fuente/</code>.</p>
 <table>
   <tr><th>Pieza</th><th>Qué resuelve</th><th>Medidas</th><th>Foto</th></tr>
   <tr><td>Piñón corregido</td><td>Agujero en D de Ø 5.2 con plano a 4.7 mm para el eje de 5 mm (se rediseña si el piñón original baila en la prueba)</td><td><span class="pend">[medidas]</span></td><td><span class="pend">[foto]</span></td></tr>
   <tr><td>Soporte de la pistola de silicón</td><td>Fija la pistola con su boquilla perforada a 1.6 mm</td><td><span class="pend">[medidas]</span></td><td><span class="pend">[foto]</span></td></tr>
-  <tr><td>Caja de la electrónica</td><td>Aloja el Arduino Uno, el A4988 y el potenciómetro, con entrada del adaptador de 12 V y salida de los cables del motor</td><td><span class="pend">[medidas]</span></td><td><span class="pend">[foto]</span></td></tr>
+  <tr><td>Caja de la electrónica y la potencia (base y 2 tapas)</td><td>Dos secciones. La A aloja el Arduino Uno, la protoboard y el potenciómetro, con ventana para el USB y salida del cable del motor. La B aloja el buck LM2596 y un carrete donde se enrolla el cable sobrante del cargador, como en una caja de fibra óptica. Seis orejas exteriores para atornillarla a la base de MDF y ranuras de ventilación. <b>Diseñada; impresión y prueba de ajuste pendientes</b></td><td>136.8 × 191.2 × 38.4 (160.8 con orejas), PLA</td><td><span class="pend">[foto]</span></td></tr>
 </table>
 
 <h2>5. Originalidad e innovación</h2>
@@ -181,14 +182,20 @@ resueltos con materiales baratos:</p>
   <li><b>Mejora opcional ya programada:</b> un tope de seguridad de temperatura con termistor y relé (sección 8).</li>
   <li><b>Análisis de la mecánica con correcciones:</b> comprobamos dientes, diámetros y ajustes sobre los STL y
       detectamos errores de ajuste, como la holgura del piñón en el eje del motor (sección 4.2).</li>
-  <li><b>Piezas propias</b>, en diseño: piñón corregido, soporte de la pistola y caja de la electrónica (sección 4.4).</li>
+  <li><b>Alimentación con un cargador de laptop</b> y un módulo buck LM2596 ajustado a 12 V, con el cable sobrante
+      enrollado dentro de la caja, como en una caja de fibra óptica (sección 4.4).</li>
+  <li><b>Caja de la electrónica y la potencia</b>, diseñada por el equipo (sección 4.4). Siguen en diseño el piñón
+      corregido y el soporte de la pistola.</li>
 </ul>
-<div class="caja"><b>Uso de inteligencia artificial.</b> Usamos un asistente de inteligencia artificial (Claude, de
-Anthropic) para medir los STL de la mecánica base, detectar errores de ajuste (sección 4.2) y redactar la mayor parte
-del firmware y la documentación, a partir de lo que el equipo definió: componentes, pines, comportamiento del motor y
-criterios de seguridad. La idea de usar la pistola de silicón como fuente de calor y la elección del diseño base,
-con el docente asesor, son del equipo. El equipo revisó el firmware y la documentación; su prueba en la máquina está
-pendiente (sección 7).</div>
+<div class="caja"><b>Uso de inteligencia artificial.</b> Las ideas, los requisitos y las decisiones de diseño son del
+equipo: la pistola de silicón como fuente de calor, la elección del diseño base con el docente asesor y, para la caja,
+las dos secciones, el carrete para el cable del cargador, el cargador de laptop con un buck a 12 V, las orejas
+exteriores, el potenciómetro en una pared y la salida del cable del motor. Usamos un asistente de inteligencia
+artificial (Claude, de Anthropic) para crearlas e implementarlas: medir los STL de la mecánica base, detectar errores
+de ajuste (sección 4.2), redactar la mayor parte del firmware y la documentación a partir de lo que el equipo definió
+(componentes, pines, comportamiento del motor y criterios de seguridad) y generar el modelo 3D de la caja con un script
+de Blender a partir de nuestra especificación. El equipo revisó el firmware, la documentación y los modelos; su prueba
+en la máquina está pendiente (sección 7).</div>
 
 <h2>6. Comparación de costos</h2>
 <p class="nota">Precios consultados el 27/11/2026 en MercadoLibre Ecuador (el producto más económico de cada tipo,
@@ -216,10 +223,12 @@ precio de lista sin envío). Tarifa eléctrica: 10.61 centavos/kWh, lo que pagan
   <tr><td>Driver A4988</td><td class="n">$2.90</td></tr>
   <tr><td>Motor NEMA 17 (0.4 N·m)</td><td class="n">$16.99</td></tr>
   <tr><td>Pistola de silicón 80 W</td><td class="n">$7.29</td></tr>
-  <tr><td>Fuente 12 V 2 A</td><td class="n">$5.09</td></tr>
-  <tr><th>Subtotal electrónica</th><th class="n">$43.02</th></tr>
+  <tr><td>Cargador de laptop (≈ 19 V, 3 A)</td><td class="n"><span class="pend">[$]</span></td></tr>
+  <tr><td>Buck LM2596 con pantalla y fusible de 3 A</td><td class="n"><span class="pend">[$]</span></td></tr>
+  <tr><th>Subtotal electrónica (sin cargador, buck ni fusible)</th><th class="n">$37.93</th></tr>
   <tr><td>PLA de las piezas (278.5 g a $21.20/kg)</td><td class="n">$5.90</td></tr>
-  <tr><th>Subtotal</th><th class="n">$48.92</th></tr>
+  <tr><td>PLA de la caja</td><td class="n"><span class="pend">[g y $]</span></td></tr>
+  <tr><th>Subtotal (sin los pendientes)</th><th class="n">$43.83</th></tr>
   <tr><td>Tornillería, varillas, rodamientos, madera</td><td class="n"><span class="pend">[$]</span></td></tr>
 </table>
 </div>
@@ -234,8 +243,8 @@ precio de lista sin envío). Tarifa eléctrica: 10.61 centavos/kWh, lo que pagan
   <tr><td>Materia prima</td><td>Botellas recolectadas. Estimado: ~35 a 45 botellas de 2 L <span class="pend">[confirmar con la prueba]</span></td><td class="n">$0.00</td></tr>
   <tr><th colspan="2">Costo por kg reciclado frente a ≈ $22.82 de un PETG comercial</th><th class="n">≤ $0.12</th></tr>
 </table>
-<p>Con un ahorro de unos $22.70 por kg, la inversión en electrónica y piezas impresas ($48.92) se recupera tras
-producir unos <b>2 kg</b> de filamento. Hay que aclarar que el filamento reciclado no iguala a uno comercial: el diámetro varía más,
+<p>Con un ahorro de unos $22.70 por kg, la inversión en electrónica y piezas impresas (al menos $43.83, más el cargador, el buck y la caja) se recupera tras
+producir unos <b>2 kg</b> de filamento, un poco más al sumar esos pendientes. Hay que aclarar que el filamento reciclado no iguala a uno comercial: el diámetro varía más,
 sale en tramos cortos que hay que empalmar y el PET de botella es más difícil de imprimir que el PETG. Sirve para
 prototipos, práctica y piezas no críticas.</p>
 
@@ -254,7 +263,8 @@ prototipos, práctica y piezas no críticas.</p>
 <h2>8. Seguridad, limitaciones y mejoras</h2>
 <ul>
   <li><b>Seguridad:</b> la pistola se usa sin modificar, con su PTC y su termostato. Va fija en su soporte, se manipula
-      con pinzas, se trabaja en un lugar ventilado y la máquina nunca queda sin supervisión.</li>
+      con pinzas, se trabaja en un lugar ventilado y la máquina nunca queda sin supervisión. La alimentación pasa por un
+      fusible de 3 A, y el buck se ajusta a 12.0 V sin carga antes de conectar el Arduino y el driver.</li>
   <li><b>Limitaciones:</b> la velocidad lineal sube a medida que el tambor se llena, porque el radio crece, así que hay
       que bajar el potenciómetro a mano. Cada botella da un tramo corto. Puede que la pistola no alcance la temperatura
       ideal para todos los tipos de botella.</li>
@@ -262,14 +272,15 @@ prototipos, práctica y piezas no críticas.</p>
       y un relé por el contacto normalmente cerrado cortan la pistola si se pasa de un límite, y el sistema detecta si el
       sensor se desconecta. El relé por NC hace que, si el Arduino falla, la pistola siga funcionando como una pistola
       normal. Requiere montar la parte de 110 V en una caja cerrada revisada por un profesor o un electricista.</li>
-  <li><b>Otras mejoras:</b> una caja impresa para la electrónica y la compensación automática del radio del tambor.</li>
+  <li><b>Otras mejoras:</b> imprimir y ajustar la caja con las piezas reales, un interruptor de encendido (hoy se apaga
+      desenchufando el cargador) y la compensación automática del radio del tambor.</li>
 </ul>
 
 <p class="nota" style="overflow-wrap:anywhere; text-align:left"><b>Créditos.</b> Mecánica base (placas laterales, reductor, tambor y
 soportes): «Máquina para hacer Filamento PET» de 3DRODV, Creality Cloud, licencia CC BY 4.0
 (creativecommons.org/licenses/by/4.0), sin modificar.
-Enlace: https://www.crealitycloud.com/model-details/69b4bb67f6b153ff3e33209c. Firmware, documentación, análisis y piezas
-propias: equipo, con asistencia de IA (sección 5).</p>
+Enlace: https://www.crealitycloud.com/model-details/69b4bb67f6b153ff3e33209c. Firmware, documentación, análisis y caja de
+la electrónica (licencia MIT): ideas y decisiones del equipo, desarrolladas con asistencia de IA (sección 5).</p>
 
 </body>
 </html>

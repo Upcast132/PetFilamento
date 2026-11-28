@@ -12,7 +12,7 @@ Anota cada valor medido y cópialo en las constantes del inicio de
 feria**, el firmware tiene que quedar calibrado y grabado: después no se
 permiten cambios en el prototipo.
 
-> **USB con el adaptador enchufado:** el Uno original conmuta solo entre USB
+> **USB con el cargador enchufado:** el Uno original conmuta solo entre USB
 > y fuente externa, así que puedes ver el Serial con los 12 V conectados. En
 > un clon, apaga la máquina antes de conectar el USB.
 
@@ -23,6 +23,24 @@ opcional, además, un termómetro de referencia.
 ---
 
 ## Versión base
+
+### Paso 0 — Alimentación: ajustar el buck a 12.0 V (SIN el Uno ni el A4988)
+
+> **Hazlo antes de conectar la electrónica.** El trimmer de un LM2596 nuevo
+> puede venir en cualquier posición, y el Uno y el A4988 no deben recibir esa
+> tensión.
+
+1. Conecta solo el cargador, con su fusible de 3 A en el positivo, a la
+   entrada del buck (IN+ e IN−). No conectes nada a la salida. Comprueba la
+   polaridad con el multímetro antes de enchufar.
+2. Enchufa el cargador. Mide con el multímetro entre OUT+ y OUT− y gira el
+   trimmer del módulo hasta leer **12.0 V**. Anota si la pantalla del módulo
+   marca lo mismo.
+3. Desenchufa el cargador y conecta la salida: VIN del Uno, VMOT del A4988 y
+   GND común.
+4. Enciende de nuevo y mide la salida con el motor en marcha. Debe seguir
+   cerca de 12 V. Si baja de forma notable, revisa los empalmes.
+5. Toca el buck tras unos minutos de uso: tibio es normal, quemar no.
 
 ### Paso 1 — Ajustar el Vref del A4988 (motor DESCONECTADO)
 

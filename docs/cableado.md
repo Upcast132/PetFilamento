@@ -7,23 +7,54 @@ Pines fijos. Si cambias alguno, también hay que cambiar el firmware.
 - **Mejora opcional:** sección 5 (termistor y relé del tope de temperatura).
   Solo si se activa `USAR_TOPE_TEMPERATURA` en el firmware.
 
-**Regla general:** todas las tierras (GND del adaptador de 12 V, del Uno, del
+**Regla general:** todas las tierras (GND de la salida del buck, del Uno, del
 A4988, del potenciómetro y, con la mejora, del termistor y del relé) van unidas
 en un solo punto común.
 
 ## 1. Alimentación
 
+La máquina se alimenta con un **cargador de laptop** (≈ 19 V, ~3 A) y un
+**módulo buck LM2596** que baja esa tensión a **12.0 V**. Los dos van en la
+sección B de la caja, y el cable sobrante del cargador se enrolla en su carrete.
+El buck **no está aislado**: IN− y OUT− son el mismo punto.
+
+### 1.1 Del cargador al buck
+
 | Desde | Hacia | Notas |
 |---|---|---|
-| Adaptador +12 V | Jack del Uno (centro positivo) **o** pin VIN | Usa uno de los dos. El Uno acepta de 7 a 12 V; su regulador genera los 5 V |
-| Adaptador +12 V | A4988 VMOT | Potencia del motor |
-| Adaptador GND | Uno GND y A4988 GND (de motor) | GND común |
+| Cargador + | Fusible de 3 A en línea → buck IN+ | El fusible va en el positivo, cerca del cargador |
+| Cargador − | Buck IN− | |
+
+- Corta el conector del cable y pela los hilos. **Identifica + y − con el
+  multímetro antes de empalmar** y marca cada hilo. Aísla los empalmes con
+  termorretráctil.
+- Si el cargador es de un equipo que sigues usando, no lo cortes: usa uno
+  dedicado a la máquina.
+
+### 1.2 Del buck a la electrónica
+
+| Desde | Hacia | Notas |
+|---|---|---|
+| Buck OUT+ (12.0 V) | Pin VIN del Uno | El Uno acepta de 7 a 12 V; su regulador genera los 5 V. No uses el jack: queda dentro de la caja |
+| Buck OUT+ (12.0 V) | A4988 VMOT | Potencia del motor |
+| Buck OUT− | Uno GND y A4988 GND (de motor) | GND común |
 | Condensador de 100 µF | Entre VMOT (+) y GND (−) | **Lo más cerca posible del A4988.** Respeta la polaridad. Protege el driver de picos de tensión |
 | Uno 5V | A4988 VDD y potenciómetro (con la mejora: divisor del termistor y relé VCC) | Lógica |
 
-> **VMOT se toma directo del adaptador**, con un cable en Y o una bornera. No
-> lo saques del pin VIN del Uno: con el jack, VIN pasa por el diodo de
-> protección de la placa, que no está pensado para la corriente del motor.
+> **Ajusta el buck a 12.0 V ANTES de conectar el Uno y el A4988** (paso 0 de
+> [puesta-en-marcha.md](puesta-en-marcha.md)). Con la salida sin conectar, mide
+> con el multímetro y gira el trimmer del módulo hasta leer 12.0 V.
+
+> **VMOT se toma directo de la salida del buck**, con un cable en Y o una
+> bornera. No lo saques del pin VIN del Uno: las pistas y el regulador de la
+> placa no están pensados para la corriente del motor. Además, por VIN no pasa
+> el diodo de protección del jack: **comprueba la polaridad** antes de conectar.
+
+> **Si el buck falla en corto**, su salida puede subir a la tensión del cargador
+> (≈ 19 V). Eso queda en el límite del Uno por VIN (máximo 20 V; se recomiendan
+> 7 a 12 V) y por debajo del máximo de VMOT del A4988 (35 V). El fusible
+> protege contra cortocircuitos, no contra esta falla. Mide la salida con el
+> multímetro al armar y después de cualquier cambio en el cableado.
 
 > Con 12 V de entrada, el regulador del Uno se calienta si se le pide mucha
 > corriente por el pin 5V. En la versión base solo alimenta la lógica. Con la
@@ -159,7 +190,7 @@ TIERRA (si hay) ─────────────────────�
 El diagrama de la versión base, sin termistor ni relé, está en el README.
 
 ```
-                 +12 V (adaptador) ─────────┬──────────────────────┐
+                 +12 V (buck) ──────────────┬──────────────────────┐
                                             │                      │
                                          [100 µF]                  │
                                             │                      │

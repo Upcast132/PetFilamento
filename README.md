@@ -22,7 +22,8 @@ con una relación total de **60:1** en tres etapas (8→32, 12→36 y 11→55).
 Licencias: **MIT** para el firmware, la documentación y las piezas propias de
 `cad/fuente/` (ver [LICENSE](LICENSE)). Los archivos de `cad/stl/` y
 `cad/proyecto/` son de 3DRODV y están bajo **CC BY 4.0** (ver
-[Créditos](#créditos)).
+[Créditos](#créditos)). Si se corrige una pieza de 3DRODV, la versión
+modificada sigue bajo CC BY 4.0, con atribución y los cambios indicados.
 
 ---
 
@@ -45,15 +46,18 @@ PetFilamento/
 
 | Cant. | Componente | Notas |
 |---|---|---|
-| 1 | Arduino Uno (ATmega328P) | 12 V por el jack (centro positivo; el Uno acepta de 7 a 12 V) o por VIN |
-| 1 | Adaptador de 12 V | Alimenta el Uno (jack o VIN) y el motor (VMOT) |
+| 1 | Arduino Uno (ATmega328P) | 12 V por el pin VIN (el Uno acepta de 7 a 12 V) |
+| 1 | Cargador de laptop (≈ 19 V, ~3 A) | Fuente de toda la máquina. Su cable entra a la caja y el sobrante se enrolla en el carrete. Se corta el conector y se empalma: identifica + y − con el multímetro |
+| 1 | Módulo buck LM2596 con pantalla | Baja los ≈ 19 V a **12.0 V** para el Uno (VIN) y el motor (VMOT). Se ajusta **sin carga** antes de conectar nada ([paso 0](docs/puesta-en-marcha.md)). Acepta de 4 a 40 V de entrada |
+| 1 | Fusible de 3 A en línea, con portafusible | En el positivo del cargador, antes del buck |
 | 1 | Driver A4988 | En medio paso (MS1 a 5 V, MS2 y MS3 a GND) |
 | 1 | Condensador electrolítico de 100 µF (≥ 25 V) | Entre VMOT y GND, junto al A4988 |
 | 1 | Resistencia de 10 kΩ | Pull-up de ENABLE a 5 V |
 | 1 | Motor NEMA 17 bipolar | 200 pasos por vuelta |
 | 1 | Potenciómetro B50K | Lineal |
 | 1 | Pistola de silicón grande, nueva, de 110 V | Con su propio cable y su PTC, enchufada directo |
-| — | Piezas impresas (diseño de 3DRODV) | 11 piezas en [`cad/`](cad/): reductor 60:1 de módulo 2, tambor de 74 mm, placas y soportes. Se imprimen en una Ender-3 V3 SE. Las piezas propias pendientes están en [Créditos](#créditos) |
+| — | Piezas impresas (diseño de 3DRODV) | 11 piezas en [`cad/`](cad/): reductor 60:1 de módulo 2, tambor de 74 mm, placas y soportes. Se imprimen en una Ender-3 V3 SE. Las piezas propias están en [Créditos](#créditos) |
+| — | Caja de la electrónica y la potencia (diseño del equipo) | 3 piezas (base y 2 tapas) en [`cad/fuente/caja/`](cad/fuente/caja/): Uno, protoboard, buck y carrete para el cable del cargador. Ver [`cad/README.md`](cad/README.md) |
 
 Para la mejora opcional del tope de temperatura hacen falta, además, un
 termistor, un relé y una caja para la parte de 110 V. La lista está en
@@ -67,6 +71,7 @@ termistor, un relé y una caja para la parte de 110 V. La lista está en
 | 2 | Rodamientos 608 | 8 × 22 × 7 mm. Van en el soporte con tubo (`G46`), cuyo alojamiento mide Ø 22.96: si quedan flojos, pegarlos |
 | 4 | Tornillos M3 de 8 a 10 mm | Fijación del NEMA 17 |
 | 8 | Tornillos M3 autorroscantes | Unen el tambor al engranaje grande: pasan por los Ø 4.56 de la rueda y muerden el piloto de Ø 2.55 del tambor. El largo se mide al armar |
+| — | Tornillería de la caja de la electrónica | 8 M3 autorroscantes de ~12 mm (tapas), 4 M3 de 6 a 8 mm (Uno), 6 tornillos de madera de 4 mm (orejas) y 2 amarras finas |
 | 1 | Base de madera | Para montar todo |
 | 1 | Cinta Kapton | Aislamiento térmico; con la mejora opcional, fija el termistor a la boquilla |
 | 1 | Broca de 1.6 mm | Para perforar la boquilla |
@@ -104,7 +109,7 @@ solo como dato informativo; no se usa en el control.
 | D5 | Relé IN | *Solo con la mejora opcional.* Relé activado = pistola cortada |
 | A1 | Divisor del termistor | *Solo con la mejora opcional.* Temperatura de la boquilla |
 | 5V | A4988 VDD, potenciómetro (y divisor y relé, con la mejora) | Lógica |
-| Jack o VIN | +12 V del adaptador | Alimentación del Uno (usa uno de los dos, no ambos) |
+| VIN | +12 V de la salida del buck | Alimentación del Uno (el jack queda dentro de la caja, sin usar) |
 | GND | GND común | Todas las tierras unidas |
 
 ## Diagrama de cableado (versión base)
@@ -112,7 +117,7 @@ solo como dato informativo; no se usa en el control.
 Detalle completo, incluida la mejora opcional, en [docs/cableado.md](docs/cableado.md).
 
 ```
-                 +12 V (adaptador) ─────────┬──────────────────────┐
+                 +12 V (buck) ──────────────┬──────────────────────┐
                                             │                      │
                                          [100 µF]                  │
                                             │                      │
@@ -138,9 +143,10 @@ Detalle completo, incluida la mejora opcional, en [docs/cableado.md](docs/cablea
   PISTOLA DE SILICÓN: enchufada directo a 110 V con su propio cable.
 ```
 
-En lugar del pin VIN, el Uno también puede alimentarse por su jack de 12 V
-(centro positivo). VMOT siempre se toma directo del adaptador, nunca del pin
-VIN del Uno.
+Los «+12 V» del diagrama salen del módulo buck, no de un adaptador de 12 V:
+cargador de laptop (≈ 19 V) → fusible de 3 A → buck LM2596 ajustado a 12.0 V.
+VMOT se toma directo de la salida del buck, nunca del pin VIN del Uno. Detalle
+y advertencias en [docs/cableado.md](docs/cableado.md#1-alimentación).
 
 ## Compilar y flashear
 
@@ -171,9 +177,9 @@ En Linux el puerto suele ser `/dev/ttyACM0` en el Uno original y
 ### Programación por USB
 
 - **Uno original:** conmuta solo entre USB y fuente externa. Puedes conectar
-  el USB con el adaptador de 12 V enchufado.
+  el USB con el cargador enchufado.
 - **Clon:** puede no tener ese circuito de conmutación. **Apaga la máquina**
-  (desenchufa el adaptador de 12 V) **antes de conectar el USB.**
+  (desenchufa el cargador) **antes de conectar el USB.**
 - Desenchufa también la pistola mientras programas. Con la mejora opcional es
   obligatorio: durante la subida el tope de temperatura no funciona.
 
@@ -322,8 +328,10 @@ Fijas: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C), `BETA_TERMISTOR`
 
 - **Tope de temperatura en hardware:** el firmware ya lo tiene (mejora
   opcional); falta montar el termistor, el relé y la caja de 110 V.
-- **Caja impresa para la electrónica:** para guardar el Uno, el A4988 y el
-  resto de módulos, con el potenciómetro accesible desde fuera.
+- **Caja impresa para la electrónica y la potencia:** ya está diseñada (Uno,
+  A4988, buck y carrete para el cable del cargador, con el potenciómetro
+  accesible desde fuera). Falta imprimirla y ajustarla con las piezas reales
+  (ver [cad/README.md](cad/README.md)).
 - **Compensación del radio del tambor:** estimar el radio a partir de las
   vueltas dadas (o medirlo) y ajustar las rpm para mantener constante la
   velocidad lineal del filamento.
@@ -335,6 +343,22 @@ Fijas: `R0_TERMISTOR` (100 kΩ), `T0_TERMISTOR_C` (25 °C), `BETA_TERMISTOR`
   [Creality Cloud](https://www.crealitycloud.com/model-details/69b4bb67f6b153ff3e33209c)
   con licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
   Archivos sin modificar. Diseño base elegido con el docente asesor.
-- **Piezas propias, pendientes** (se diseñan en FreeCAD y sus `.FCStd` irán en
-  `cad/fuente/`): piñón corregido con agujero en D para el eje de 5 mm,
-  soporte de la pistola de silicón y caja de la electrónica.
+- **Caja de la electrónica y la potencia** (`cad/fuente/caja/`, licencia MIT):
+  diseño del equipo. Las ideas, los requisitos y las decisiones son del equipo:
+  separar la electrónica y la potencia en dos secciones, el carrete para
+  enrollar el cable del cargador como en una caja de fibra óptica, el cargador
+  de laptop con un buck a 12 V, las orejas exteriores, el potenciómetro en una
+  pared y la salida del cable del motor. Un asistente de IA (Claude, de
+  Anthropic) generó el modelo con un script de Blender a partir de esa
+  especificación.
+- **Piezas propias, pendientes** (se modelan en Blender y irán en
+  `cad/fuente/`): piñón corregido con agujero en D para el eje de 5 mm y
+  soporte de la pistola de silicón. Si se corrige una pieza de 3DRODV, la
+  versión modificada sigue bajo CC BY 4.0, con atribución y los cambios
+  indicados.
+- **Uso de inteligencia artificial:** las ideas, los requisitos y las
+  decisiones de diseño son del equipo. Un asistente de IA (Claude, de
+  Anthropic) ayudó a crearlas e implementarlas: medir los STL, redactar la
+  mayor parte del firmware y la documentación, y escribir el script de la caja.
+  El equipo revisa el resultado. El firmware y la caja todavía no se han
+  probado en la máquina real.

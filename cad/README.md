@@ -9,8 +9,8 @@
 
 Piezas impresas de la máquina. El reglamento de la feria (Art. 2.1) exige
 entregar los archivos de modelado originales (STL y CAD) junto con el informe.
-Los archivos editables de las piezas propias del equipo (ver
-[Piezas propias](#piezas-propias-pendientes)) irán en `fuente/`.
+Los archivos editables y los STL de las piezas propias del equipo (ver
+[Piezas propias](#piezas-propias)) están en `fuente/`.
 
 ## Organización
 
@@ -18,7 +18,8 @@ Los archivos editables de las piezas propias del equipo (ver
 cad/
 ├── stl/        # piezas de 3DRODV listas para imprimir (.stl), sin modificar
 ├── proyecto/   # proyecto de Creality Print (.3mf) de 3DRODV: hay que re-laminarlo para la Ender-3 V3 SE
-└── fuente/     # .FCStd (FreeCAD) de las piezas propias del equipo (pendiente)
+└── fuente/     # piezas propias del equipo (MIT): modelo editable, script y STL
+    └── caja/   # caja de la electrónica y la potencia: generar_caja.py, caja_electronica.blend y 3 STL
 ```
 
 ## Piezas
@@ -55,17 +56,85 @@ y la relación 60:1 del firmware.
 | Varillas M8 en las placas | Ø 8 | Ø 8.0 | Sin holgura: quedan fijas. Si no entran, repasar con broca de 8 mm |
 | Motor en las placas y en G50 | Patrón de 31 mm, M3 | Ranuras Ø 3.4 de 10 mm | Permiten ajustar la distancia del engrane. Correcto |
 
-## Piezas propias (pendientes)
+## Piezas propias
 
-Diseño del equipo en FreeCAD. Los `.FCStd` y los STL exportados de estas piezas
-irán en `fuente/`, para no mezclarlos con los de 3DRODV. Licencia MIT.
+Diseño del equipo, modelado en Blender. Los archivos editables y los STL
+exportados de estas piezas van en `fuente/`, para no mezclarlos con los de
+3DRODV. Licencia MIT para las piezas nuevas. **Si se corrige una pieza de
+3DRODV** (el piñón o el alojamiento del 608), esa versión modificada sigue bajo
+**CC BY 4.0**: se mantiene la atribución a 3DRODV y se indican los cambios.
 
-| Pieza | Qué hay que hacer |
+> **Autoría y uso de IA:** las ideas, los requisitos y las decisiones de diseño
+> son del equipo. Un asistente de IA (Claude, de Anthropic) ayudó a crearlas e
+> implementarlas: escribió el script de Blender que genera el modelo a partir de
+> la especificación del equipo y comprobó las medidas de los STL.
+
+| Pieza | Estado y qué hay que hacer |
 |---|---|
-| Piñón corregido (reemplaza a `G51`) | Agujero en D de Ø 5.2 con el plano a 4.7 mm, para el eje de 5 mm del NEMA 17. **Rediseñar solo si la impresión de prueba de `G51` baila en el eje** |
-| Alojamiento del 608 en `G46` | Ø 22.2 en lugar de Ø 22.96. **Rediseñar solo si la impresión de prueba queda floja** |
-| Soporte de la pistola de silicón | Fija la pistola con su boquilla perforada a 1.6 mm |
-| Caja de la electrónica | Arduino Uno (68.6 × 53.4 mm, agujeros de Ø 3.2), A4988, potenciómetro, entrada del adaptador de 12 V y salida de los cables del motor |
+| Caja de la electrónica y la potencia | **Diseñada; sin imprimir ni probar.** Ver [la sección siguiente](#caja-de-la-electrónica-y-la-potencia) |
+| Piñón corregido (reemplaza a `G51`) | Pendiente. Agujero en D de Ø 5.2 con el plano a 4.7 mm, para el eje de 5 mm del NEMA 17. **Rediseñar solo si la impresión de prueba de `G51` baila en el eje** |
+| Alojamiento del 608 en `G46` | Pendiente. Ø 22.2 en lugar de Ø 22.96. **Rediseñar solo si la impresión de prueba queda floja** |
+| Soporte de la pistola de silicón | Pendiente, para después del armado. Fija la pistola con su boquilla perforada a 1.6 mm |
+
+### Caja de la electrónica y la potencia
+
+Una sola base con dos secciones separadas por una pared, y una tapa para cada
+una: 3 piezas. Los archivos están en [`fuente/caja/`](fuente/caja/).
+
+| Archivo | Qué es |
+|---|---|
+| `generar_caja.py` | Script de Blender que construye el modelo. Todas las medidas están en el diccionario `P` del inicio |
+| `caja_electronica.blend` | Modelo editable, guardado con Blender 4.0 |
+| `caja_base.stl`, `caja_tapa_a.stl`, `caja_tapa_b.stl` | Piezas listas para imprimir |
+
+Para regenerar el modelo tras cambiar un parámetro:
+`blender -b -P cad/fuente/caja/generar_caja.py`. Reescribe los cuatro archivos
+junto al script.
+
+| Zona | Qué lleva |
+|---|---|
+| Exterior de la base | 136.8 × 191.2 × 38.4 mm (160.8 mm de ancho con las orejas). Cabe en la cama de la Ender-3 V3 SE |
+| Sección A (arriba) | Interior de 132 × 108 × 36 mm. Arduino Uno sobre 4 postes, marco para una protoboard media (400 puntos), ventana del USB, potenciómetro en la pared izquierda y salida del cable del motor en la derecha, con puente para amarra |
+| Sección B (abajo) | Interior de 132 × 76 × 36 mm. Carrete de Ø 66 para enrollar el cable sobrante del cargador (como en una caja de fibra óptica), marco para el módulo buck LM2596 (66 × 36 × 13 mm) y entrada del cable con puente para amarra |
+| Pared divisoria | Paso de Ø 10 para los cables de 12 V |
+| Fijación | 6 orejas exteriores (3 por lado) para atornillar la caja a la base de MDF. Quedan libres por arriba, para el destornillador |
+| Tapas | 4 tornillos cada una y ranuras de ventilación |
+
+**Cómo imprimirla**
+
+- Imprime primero **solo la base** y prueba el ajuste con las piezas reales
+  (Uno, protoboard, buck y cable) antes de imprimir las tapas.
+- Hay que imprimir **las dos tapas**: no son iguales (A: 136.8 × 112.7 mm; B:
+  136.8 × 78.3 mm) y cada una cubre su sección.
+- Las tapas se exportaron volteadas, con la cara exterior sobre la cama, para
+  imprimirlas sin soportes. Al montarlas, se voltean de arriba hacia abajo,
+  como la hoja de un calendario.
+- PLA, capa de 0.2 mm, **3 paredes** (los postes sujetan tornillos), brim de
+  5 mm y sin soportes.
+- El PLA se ablanda cerca de los 60 °C: monta la caja lejos de la boquilla de la
+  pistola.
+
+**Medidas por confirmar con las piezas reales.** Se cambian en `P` y se
+regenera:
+
+| Qué | Parámetro | Valor inicial |
+|---|---|---|
+| Posición del conector USB-B del Uno | `USB_X` | 45 mm |
+| Diámetro del cable del cargador (debe pasar con holgura) | `diam_cargador` | 7 mm |
+| Rosca del potenciómetro | `diam_potenciometro` | 7.2 mm |
+| Ancho de la zona del buck | `buck_ancho_x` | 38 mm; pasa a 42 si el módulo real mide 66 × 40 |
+
+**Tornillería:** 8 tornillos M3 autorroscantes de unos 12 mm para las tapas, 4
+M3 de 6 a 8 mm para el Uno, 6 tornillos de madera de 4 mm para las orejas
+(agujero guía de 3 mm en el MDF) y 2 amarras finas (2.5 mm) para los cables.
+
+**Carrete:** el canal aloja del orden de 1.5 a 1.9 m de cable (estimado). Las 6
+pestañas lo retienen solo en parte: si hace falta, asegura el rollo con una
+amarra.
+
+**Verificación:** los tres STL se revisaron con cortes de malla y por vértices.
+Las mallas son cerradas y las medidas coinciden con la especificación del
+equipo. Falta imprimir la base y probarla con las piezas reales.
 
 ## Parámetros de impresión
 
